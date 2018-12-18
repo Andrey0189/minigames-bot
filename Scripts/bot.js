@@ -226,10 +226,10 @@ client.on('message', message => {
         }
 
         function move (currentField, img, position) {
-            jimp.read(__dirname, '../Storage/tttField.png', (err, field) => {
+            jimp.read('../Storage/tttField.png', (err, field) => {
                 if (err) throw err;
                 if (img) field = img;
-                jimp.read(__dirname, '../Storage/cross.png', (err, cross) => {
+                jimp.read('../Storage/cross.png', (err, cross) => {
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
                     currentField[position - 1] = 'ai';
                     field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
@@ -256,7 +256,7 @@ client.on('message', message => {
                                 if (isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) {
                                     return func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 } else if (msg.content.toLowerCase() === 'end') return message.channel.send('Вы успешно остановили игру')
-                                jimp.read(__dirname, '../Storage/circle.png', (err, circle) => {
+                                jimp.read('../Storage/circle.png', (err, circle) => {
                                     field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                     currentField[number - 1] = 'player';
                                     field.getBuffer(jimp.MIME_PNG, (error, newBuffer) => {
