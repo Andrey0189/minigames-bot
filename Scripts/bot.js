@@ -229,7 +229,7 @@ client.on('message', message => {
         message.channel.send(func.embed(
             `Обновление ${update}`,
             message.author.avatarURL,
-            `• ${bot.updates[update].join('\n\n**•** ')}`,
+            `**•** ${bot.updates[update].join('\n\n**•** ')}`,
             bot.colors.main, client
         ));
     }
