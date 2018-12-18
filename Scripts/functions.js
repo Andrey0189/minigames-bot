@@ -5,6 +5,11 @@ module.exports.random = function (min, max) {
     return Math.floor(Math.random() * (max + 1 - min)) + min;
 }
 
+module.exports.declOfNum = function (number, titles) {
+    let cases = [2, 0, 1, 1, 1, 2];
+    return titles[(number % 100 > 4 && number % 100 < 20)? 2 : cases[(number % 10 < 5)?number % 10 : 5]];
+}
+
 module.exports.embed = function (title, img, desc, color, client) {
     const embed = new Discord.RichEmbed()
     .setAuthor(title, img)
