@@ -309,7 +309,7 @@ client.on('message', message => {
             return null;
         }
 
-        function move (currentField, img, position) {
+        function move (currentField, img, position, numberOfMoves) {
             jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524671806158798848/tttField.png', (err, field) => {
                 if (err) throw err;
                 if (img) field = img;
@@ -322,17 +322,17 @@ client.on('message', message => {
                         if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты выиграл!`, 
                             message.author.avatarURL,
-                            `Искусствнный интеллект проиграл :(`,
+                            `Ты совершил это за **${numberOfMoves}** ходов`,
                             bot.colors.green, client)});
                         if (calculatingWin(currentField, 'ai')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты проиграл >:D`, 
                             message.author.avatarURL,
-                            `*Изи вин*`,
+                            `Я победил за **${numberOfMoves + 1}** ходов`,
                             bot.colors.red, client)});
                         if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ничья!`, 
                             message.author.avatarURL,
-                            `Мы равны?`,
+                            `И снова ничья?`,
                             bot.colors.yellow, client)});
                         message.reply('Укажите номер поля внизу (1-9)', {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
                             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
@@ -348,11 +348,12 @@ client.on('message', message => {
                                     currentField[number - 1] = 'player';
                                     field.getBuffer(jimp.MIME_PNG, (error, newBuffer) => {
                                         let newPosition = func.random(1, 9);
+                                        numberOfMoves++;
                                         if (currentField[newPosition - 1]) {
                                             while (currentField[newPosition - 1]) newPosition = func.random(1, 9);
-                                            move(currentField, field, newPosition)
+                                            move(currentField, field, newPosition, numberOfMoves)
                                         }
-                                        else move(currentField, field, newPosition)
+                                        else move(currentField, field, newPosition, numberOfMoves)
                                     });
                                 });
                             });
@@ -361,7 +362,7 @@ client.on('message', message => {
                 });
             });
         }
-        move(gameField, null, firstMove)
+        move(gameField, null, firstMove, 0);
     }
 
     if (command === 'help') {
