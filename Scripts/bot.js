@@ -322,12 +322,12 @@ client.on('message', message => {
                         if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты выиграл!`, 
                             message.author.avatarURL,
-                            `Ты совершил это за **${numberOfMoves}** ходов`,
+                            `Ты совершил это за **${numberOfMoves}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
                             bot.colors.green, client)});
                         if (calculatingWin(currentField, 'ai')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты проиграл >:D`, 
                             message.author.avatarURL,
-                            `Я победил за **${numberOfMoves + 1}** ходов`,
+                            `Я победил тебя за **${numberOfMoves + 1}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
                             bot.colors.red, client)});
                         if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ничья!`, 
