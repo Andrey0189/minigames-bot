@@ -232,6 +232,7 @@ client.on('message', message => {
                 jimp.read('../Storage/cross.png', (err, cross) => {
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
                     currentField[position - 1] = 'ai';
+                    console.log(currentField);
                     field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
                         if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты выиграл!`, 
@@ -256,6 +257,7 @@ client.on('message', message => {
                                 if (isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) {
                                     return func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 } else if (msg.content.toLowerCase() === 'end') return message.channel.send('Вы успешно остановили игру')
+
                                 jimp.read('../Storage/circle.png', (err, circle) => {
                                     field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                     currentField[number - 1] = 'player';
