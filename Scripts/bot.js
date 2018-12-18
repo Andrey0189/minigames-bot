@@ -260,15 +260,15 @@ client.on('message', message => {
         const firstMove = firstMoves[func.random(0, firstMoves.length - 1)];
 
         function puttingImages(numberOfSquare) {
-            if (numberOfSquare === 1) return [70, 80];
-            if (numberOfSquare === 2) return [390, 80];
-            if (numberOfSquare === 3) return [710, 80];
-            if (numberOfSquare === 4) return [70, 400];
-            if (numberOfSquare === 5) return [390, 400];
-            if (numberOfSquare === 6) return [710, 400];
-            if (numberOfSquare === 7) return [70, 720];
-            if (numberOfSquare === 8) return [390, 720];
-            if (numberOfSquare === 9) return [710, 720];
+            if (numberOfSquare === 1) return [50, 48];
+            if (numberOfSquare === 2) return [400, 48];
+            if (numberOfSquare === 3) return [750, 48];
+            if (numberOfSquare === 4) return [50, 400];
+            if (numberOfSquare === 5) return [404, 400];
+            if (numberOfSquare === 6) return [750, 400];
+            if (numberOfSquare === 7) return [48, 752];
+            if (numberOfSquare === 8) return [400, 752];
+            if (numberOfSquare === 9) return [752, 752];
         }
 
         function calculatingWin(field, player) {
@@ -310,10 +310,10 @@ client.on('message', message => {
         }
 
         function move (currentField, img, position) {
-            jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383813955223563/tttField.png', (err, field) => {
+            jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524671806158798848/tttField.png', (err, field) => {
                 if (err) throw err;
                 if (img) field = img;
-                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383794262966272/cross.png', (err, cross) => {
+                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524664027356594176/cross.png', (err, cross) => {
                     if (checkingDoubleMoves(currentField, position, 'player')) position = checkingDoubleMoves(currentField, position, 'player') + 1;
                     if (checkingDoubleMoves(currentField, position, 'ai')) position = checkingDoubleMoves(currentField, position, 'ai') + 1;
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
@@ -334,7 +334,7 @@ client.on('message', message => {
                             message.author.avatarURL,
                             `Мы равны?`,
                             bot.colors.yellow, client)});
-                        message.channel.send('Укажите номер поля внизу (1-9)', {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                        message.reply('Укажите номер поля внизу (1-9)', {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
                             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                             collector.on('collect', msg => {
                                 collector.stop();
@@ -343,7 +343,7 @@ client.on('message', message => {
                                     return func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 } else if (msg.content.toLowerCase() === 'end') return message.channel.send('Вы успешно остановили игру')
 
-                                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383780052664340/circle.png', (err, circle) => {
+                                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524663994875641904/circle.png', (err, circle) => {
                                     field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                     currentField[number - 1] = 'player';
                                     field.getBuffer(jimp.MIME_PNG, (error, newBuffer) => {
