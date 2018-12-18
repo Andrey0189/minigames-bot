@@ -16,14 +16,14 @@ module.exports.embed = function (title, img, desc, color, client) {
 }
 
 module.exports.send = function (id, msg, client) {
-    if (!msg.author === bot.creatorID) client.channels.get(id).send(msg)
+    client.channels.get(id).send(msg)
 }
 
 module.exports.err = function (desc, perms, msg) {
     const embed = new Discord.RichEmbed()
     .setAuthor('Ошибка', msg.author.avatarURL)
     .setDescription(`Причина: **${desc}**`)
-    .setColor('ff5555')
+    .setColor(bot.colors.red)
     .setFooter(`${bot.name} ${bot.version}`)
     .setTimestamp();
     if (perms) embed.setDescription(`У вас нет права **${perms}**`);

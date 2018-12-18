@@ -10,11 +10,15 @@ const serverLeaveJoin = '522729281349222410';
 const commandsUsing = '522729347417767946';
 const bugsAndIdeas = '522729302073147392';
 
+let usedCommands = 0;
+let commandsPerHour = 0;
+
 /** @namespace process.env.BOT_TOKEN */
 
 client.on('ready', () => {
     console.log(`Бот запущен.\nСервера: ${client.guilds.size}\nЮзеры: ${client.users.size}\nКаналы: ${client.channels.size}`);
     client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : 1});
+    setInterval(() => commandsPerHour = 0, 3600000);
 });
 
 client.on('guildCreate', (guild) => {
@@ -48,6 +52,9 @@ client.on('guildDelete', (guild) => {
 
 client.on('message', message => {
     if(message.channel.type !== `text` || message.author.bot || !message.content.startsWith(bot.prefix)) return;
+
+    commandsPerHour++;
+    usedCommands++;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
@@ -92,10 +99,10 @@ client.on('message', message => {
                 (isWin? 'Ты выиграл!':`Ты проиграл >:D`), 
                 message.author.avatarURL,
                 `**${message.author.username}** - выбрал ${choice}\n**${client.user.username}** - выбрал ${computerChoice}`, 
-                (isWin? '55ff55':'ff5555'), client
+                (isWin? bot.colors.green : bot.colors.red), client
             ));
 
-        else message.channel.send(func.embed('Ничья!', message.author.avatarURL, `**Оба выбрали** ${choice}`, 'ffff55', client));
+        else message.channel.send(func.embed('Ничья!', message.author.avatarURL, `**Оба выбрали** ${choice}`, bot.colors.yellow, client));
     }
 
     if (['countries', 'страны', 'capitals', 'столицы'].includes(command)) {
@@ -127,7 +134,7 @@ client.on('message', message => {
         const embed = new Discord.RichEmbed()
         .setAuthor(`Миниигра "${minigameName}"`, message.author.avatarURL,)
         .setDescription(`${message.member}, ${question} **"${variants[definder]}"**?`)
-        .setColor('af00ff')
+        .setColor(bot.colors.main)
         .setFooter(`Напишите цифру внизу (У вас есть ${seconds} секунд!)`)
         .setTimestamp();
         for (let i = 1; i < numberOfVariants + 1; i++) {
@@ -148,7 +155,7 @@ client.on('message', message => {
                         `Ты проиграл >:D`, 
                         message.author.avatarURL,
                         `Правильный ответ: **${numberInList})** ${answers[definder]}`,
-                        'ff5555', client
+                        bot.colors.red, client
                     ));
                     func.send(commandsUsing, `${message.author} (${message.author.tag}) **проиграл** в ${prefix}${command} на ${message.guild.name}`, client)
                 }
@@ -160,7 +167,7 @@ client.on('message', message => {
                             'Ты выиграл!',
                             message.author.avatarURL,
                             `Правильный ответ **${number + 1})** ${answers[definder]}`,
-                            '55ff55', client
+                            bot.colors.green, client
                         ));
                         func.send(commandsUsing, `${message.author} (${message.author.tag}) **выиграл** в ${prefix}${command} на ${message.guild.name}`, client)
                     }
@@ -196,9 +203,60 @@ client.on('message', message => {
         })
     }
 
+    if (['roll', 'dice', 'rand', 'random'].includes(command)) {
+        let num1 = parseInt(args[0]) || 1;
+        let num2 = parseInt(args[1]) || 6;
+
+        if (num1 > num2) {
+            let num3 = num2;
+            num2 = num1;
+            num1 = num3;
+        }
+
+        const randomNum = func.random(num1, num2);
+
+        message.channel.send(func.embed(
+            `Генератор случайных чисел (От ${num1} до ${num2})`,
+            message.author.avatarURL,
+            `Выпало число ${randomNum} :game_die:`,
+            bot.colors.main, client
+        ));
+    }
+
+    if (command === 'update') {
+        const update = args[0] || bot.version;
+        if (!bot.updatesList.includes(update)) return func.err(`Вы неправильно указали номер обновления. Существующие версии:\b${bot.updatesList.join(', ')}`, null, message);
+        message.channel.send(func.embed(
+            `Обновление ${update}`,
+            message.author.avatarURL,
+            `• ${bot.updates[update].join('\n\n**•** ')}`,
+            bot.colors.main, client
+        ));
+    }
+
+    if (command === 'info') {
+        const embed = new Discord.RichEmbed()
+        .setTitle(`Бот "${bot.name}"`)
+        .setThumbnail(client.user.avatarURL)
+        .addField(`Пинг :ping_pong:`, `${Math.round(client.ping)} ms`, true)
+        .addField('Использовано команд :wrench:', `${usedCommands} times`,  true)
+        .addField('Команд за час :clock11:', `${commandsPerHour} per hour`, true)
+        .addField(`Юзеры :bust_in_silhouette:`, `${client.users.size} users`, true)
+        .addField(`Каналы :keyboard:`, `${client.channels.size} channels`, true)
+        .addField(`Сервера :desktop:`, `${client.guilds.size} servers`, true)
+        .addField(`Время работы :stopwatch:`, `${Math.round(client.uptime / (1000 * 60 * 60))} hours, ${Math.round(client.uptime / (1000 * 60)) % 60} minutes`, true)
+        .addField(`Включен :on:`, client.readyAt.toString().slice(4, -32), true)
+        .addField(`Версия :floppy_disk:`, bot.version, true)
+        .addField(`Авторизация :key:`, client.user.tag, true)
+        .addField(`Голосовые каналы :microphone:`, `${client.voiceConnections.size} channels`, true)
+        .addField(`Шарды :gem:`, `${client.options.shardCount} shards`, true)
+        .setColor(bot.colors.main);
+        message.channel.send({embed});
+    }
+
     if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) {
         let gameField = new Array(9);
-        const firstMoves = [1, 3, 5, 7, 9];
+        const firstMoves = [1, 5, 9];
         const firstMove = firstMoves[func.random(0, firstMoves.length - 1)];
 
         function puttingImages(numberOfSquare) {
@@ -225,11 +283,39 @@ client.on('message', message => {
             else return false;
         }
 
+        function checkingDoubleMoves(field, position, player) {
+            for (let i = 0; i < 3; i++) //Чекаем 2 горизональных справа
+                if (field[i] === player && field[i + 3] === player && !field[i + 6]) return position = i + 6;
+            for (let i = 0; i < 3; i++) //Чекаем 2 горизональных слева
+                if (field[i + 6] === player && field[i + 3] === player && !field[i]) return position = i;
+                
+            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных сверху
+                if (field[i] === player && field[i + 1] === player && !field[i + 2]) return position = i + 2;
+            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных снизу
+                if (field[i + 2] === player && field[i + 1] === player && !field[i]) return position = i;
+
+            for (let i = 0; i < 3; i++) //Чекаем 2 вертикальных с пустым пронстанством между фигурами
+                if (field[i] === player && field[i + 6] === player && !field[i + 3]) return position = i + 3;
+            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 горизонатльных с пустым пронстанством между фигурами
+                if (field[i] === player && field[i + 2] === player && !field[i + 1]) return position = i + 1;
+
+            for (let i = 0; i < 9; i = i + 2) { //Чекаем 2 диагональных
+                if (i === 4) continue;
+                if (field[4] === player && field[i] === player && !field[Math.abs(i - 8)]) return position = Math.abs(i - 8);
+            }
+
+            for (let i = 0; i < 3; i = i + 2)  //Чекаем 2 диагональных с пустым пронстанством между фигурами
+                if (field[i] === player && field[Math.abs(i - 8)] === player && !field[4]) return position = 4;
+            return null;
+        }
+
         function move (currentField, img, position) {
             jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383813955223563/tttField.png', (err, field) => {
                 if (err) throw err;
                 if (img) field = img;
                 jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383794262966272/cross.png', (err, cross) => {
+                    if (checkingDoubleMoves(currentField, position, 'player')) position = checkingDoubleMoves(currentField, position, 'player') + 1;
+                    if (checkingDoubleMoves(currentField, position, 'ai')) position = checkingDoubleMoves(currentField, position, 'ai') + 1;
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
                     currentField[position - 1] = 'ai';
                     field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
@@ -237,17 +323,17 @@ client.on('message', message => {
                             `Ты выиграл!`, 
                             message.author.avatarURL,
                             `Искусствнный интеллект проиграл :(`,
-                            '55ff55', client)});
+                            bot.colors.green, client)});
                         if (calculatingWin(currentField, 'ai')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты проиграл >:D`, 
                             message.author.avatarURL,
                             `*Изи вин*`,
-                            'ff5555', client)});
+                            bot.colors.red, client)});
                         if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ничья!`, 
                             message.author.avatarURL,
                             `Мы равны?`,
-                            'ffff55', client)});
+                            bot.colors.yellow, client)});
                         message.channel.send('Укажите номер поля внизу (1-9)', {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
                             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                             collector.on('collect', msg => {
@@ -286,21 +372,24 @@ client.on('message', message => {
 \`<...>\` - Обязательный параметр
 \`[...]\` - Необязательный параметр
 \`&\` - Оператор И
-\`|\` - Оператор ИЛИ\n
+\`|\` - Оператор ИЛИ
+\`n\` - Число\n
 **Миниигры:**
 **${prefix}rsp** \`<камень | ножницы | бумага>\` - Камень, ножницы, бумага
 **${prefix}countries** \`[easy | medium | hard | impossible]\` - Угадай флаг страны
 **${prefix}capitals** \`[easy | medium | hard | impossible]\` - Угадай столицу страны
-**${prefix}ttt** - Крестики-нолики\n
+**${prefix}ttt** - Крестики-нолики
+**${prefix}rand** \`[n & n]\` - Генератор случайных чисел\n
 **Другие команды:**
 **${prefix}bug** \`<описание бага>\` - Если бот работает не так как должен, то вы можете написать об этом разработчику с помощью этой команды
 **${prefix}idea** \`<идея>\` - Отправить идею о новой миниигре разработчику
 **${prefix}invite** - Ссылка на приглашение бота
-**${prefix}creator** - Узнать создателя бота\n
+**${prefix}creator** - Узнать создателя бота
+**${prefix}update** \`[n.n.n]\` - Узнать что было добавлено в новом обновлении\n
 **Получить больше помощи можно тут:** https://discord.gg/NvcAKdt
 `,
 
-            'af00ff', client
+            bot.colors.main, client
         ));
     };
 });
