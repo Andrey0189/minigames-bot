@@ -226,10 +226,10 @@ client.on('message', message => {
         }
 
         function move (currentField, img, position) {
-            jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383780052664340/circle.png', (err, field) => {
+            jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383813955223563/tttField.png', (err, field) => {
                 if (err) throw err;
                 if (img) field = img;
-                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383813955223563/tttField.png', (err, cross) => {
+                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383794262966272/cross.png', (err, cross) => {
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
                     currentField[position - 1] = 'ai';
                     console.log(currentField);
@@ -258,7 +258,7 @@ client.on('message', message => {
                                     return func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 } else if (msg.content.toLowerCase() === 'end') return message.channel.send('Вы успешно остановили игру')
 
-                                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383794262966272/cross.png', (err, circle) => {
+                                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383780052664340/circle.png', (err, circle) => {
                                     field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                     currentField[number - 1] = 'player';
                                     field.getBuffer(jimp.MIME_PNG, (error, newBuffer) => {
