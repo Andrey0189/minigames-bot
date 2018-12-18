@@ -232,7 +232,6 @@ client.on('message', message => {
                 jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524383794262966272/cross.png', (err, cross) => {
                     if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
                     currentField[position - 1] = 'ai';
-                    console.log(currentField);
                     field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
                         if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                             `Ты выиграл!`, 
