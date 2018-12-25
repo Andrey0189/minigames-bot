@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const bot = require('../Storage/constants');
-const func = require('./functions');
+const bot = require('../Storage/constants.json');
+const func = require('./functions.js');
 const jimp = require('jimp');
 
 module.exports.run = function (message, args, client,) {
