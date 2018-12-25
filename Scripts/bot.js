@@ -2,7 +2,9 @@ const Discord = require('discord.js');
 const client = new Discord.Client({disableEveryone : true});
 const bot = require('../Storage/constants');
 const func = require('./functions');
-const jimp = require('jimp');
+const tictactoe = require('./tictactoe');
+const seabattle = require('./seabattle');
+//const chess = require('./chess');
 
 const prefix = '/';
 
@@ -59,6 +61,11 @@ client.on('message', message => {
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
+    if (message.author.id !== bot.creatorID) func.send(commandsUsing, func.embed(
+        message.author.tag, message.author.avatarURL,
+        `**${message.author.tag}** использовал команду **${bot.prefix}${command}** ${(args[0]? `\`${args.join(' ')}\`` : '')} на сервере **${message.guild.name}**`, bot.colors.green, client
+    ), client);
+        
     if (['rsp', 'кнб'].includes(command)) {
         let choice = args[0];
 
@@ -66,8 +73,6 @@ client.on('message', message => {
         else if (['p', 'paper', 'бумага', 'б'].includes(choice)) choice = ':page_with_curl:';
         else if (['s', 'scissors', 'ножницы', 'н'].includes(choice)) choice = ':scissors:';
         else return func.err('Вы указали неправильное значение', null, message)
-
-        func.send(commandsUsing, `${message.author} (${message.author.tag}) играет в ${prefix}rsp на ${message.guild.name}`, client)
 
         let computerChoice = Math.random();
 
@@ -157,7 +162,6 @@ client.on('message', message => {
                         `Правильный ответ: **${numberInList})** ${answers[definder]}`,
                         bot.colors.red, client
                     ));
-                    func.send(commandsUsing, `${message.author} (${message.author.tag}) **проиграл** в ${prefix}${command} на ${message.guild.name}`, client)
                 }
                 if (msg.content || !isNaN(parseInt(msg.content))) {
                     const number = parseInt(msg.content) - 1;
@@ -169,7 +173,6 @@ client.on('message', message => {
                             `Правильный ответ **${number + 1})** ${answers[definder]}`,
                             bot.colors.green, client
                         ));
-                        func.send(commandsUsing, `${message.author} (${message.author.tag}) **выиграл** в ${prefix}${command} на ${message.guild.name}`, client)
                     }
 
                     else youLose();
@@ -254,116 +257,9 @@ client.on('message', message => {
         message.channel.send({embed});
     }
 
-    if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) {
-        let gameField = new Array(9);
-        const firstMoves = [1, 5, 9];
-        const firstMove = firstMoves[func.random(0, firstMoves.length - 1)];
-
-        function puttingImages(numberOfSquare) {
-            if (numberOfSquare === 1) return [50, 48];
-            if (numberOfSquare === 2) return [400, 48];
-            if (numberOfSquare === 3) return [750, 48];
-            if (numberOfSquare === 4) return [50, 400];
-            if (numberOfSquare === 5) return [404, 400];
-            if (numberOfSquare === 6) return [750, 400];
-            if (numberOfSquare === 7) return [48, 752];
-            if (numberOfSquare === 8) return [400, 752];
-            if (numberOfSquare === 9) return [752, 752];
-        }
-
-        function calculatingWin(field, player) {
-            if (field[0] === player && field[1] === player && field[2] === player) return true;
-            else if (field[3] === player && field[4] === player && field[5] === player) return true;
-            else if (field[6] === player && field[7] === player && field[8] === player) return true;
-            else if (field[0] === player && field[3] === player && field[6] === player) return true;
-            else if (field[1] === player && field[4] === player && field[7] === player) return true;
-            else if (field[2] === player && field[5] === player && field[8] === player) return true;
-            else if (field[0] === player && field[4] === player && field[8] === player) return true;
-            else if (field[2] === player && field[4] === player && field[6] === player) return true;
-            else return false;
-        }
-
-        function checkingDoubleMoves(field, position, player) {
-            for (let i = 0; i < 3; i++) //Чекаем 2 горизональных справа
-                if (field[i] === player && field[i + 3] === player && !field[i + 6]) return position = i + 6;
-            for (let i = 0; i < 3; i++) //Чекаем 2 горизональных слева
-                if (field[i + 6] === player && field[i + 3] === player && !field[i]) return position = i;
-                
-            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных сверху
-                if (field[i] === player && field[i + 1] === player && !field[i + 2]) return position = i + 2;
-            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных снизу
-                if (field[i + 2] === player && field[i + 1] === player && !field[i]) return position = i;
-
-            for (let i = 0; i < 3; i++) //Чекаем 2 вертикальных с пустым пронстанством между фигурами
-                if (field[i] === player && field[i + 6] === player && !field[i + 3]) return position = i + 3;
-            for (let i = 0; i < 9; i = i + 3) //Чекаем 2 горизонатльных с пустым пронстанством между фигурами
-                if (field[i] === player && field[i + 2] === player && !field[i + 1]) return position = i + 1;
-
-            for (let i = 0; i < 9; i = i + 2) { //Чекаем 2 диагональных
-                if (i === 4) continue;
-                if (field[4] === player && field[i] === player && !field[Math.abs(i - 8)]) return position = Math.abs(i - 8);
-            }
-
-            for (let i = 0; i < 3; i = i + 2)  //Чекаем 2 диагональных с пустым пронстанством между фигурами
-                if (field[i] === player && field[Math.abs(i - 8)] === player && !field[4]) return position = 4;
-            return null;
-        }
-
-        function move (currentField, img, position, numberOfMoves) {
-            jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524671806158798848/tttField.png', (err, field) => {
-                if (err) throw err;
-                if (img) field = img;
-                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524664027356594176/cross.png', (err, cross) => {
-                    if (checkingDoubleMoves(currentField, position, 'player')) position = checkingDoubleMoves(currentField, position, 'player') + 1;
-                    if (checkingDoubleMoves(currentField, position, 'ai')) position = checkingDoubleMoves(currentField, position, 'ai') + 1;
-                    if (!calculatingWin(currentField, 'player')) field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
-                    currentField[position - 1] = 'ai';
-                    field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
-                        if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
-                            `Ты выиграл!`, 
-                            message.author.avatarURL,
-                            `Ты совершил это за **${numberOfMoves}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
-                            bot.colors.green, client)});
-                        if (calculatingWin(currentField, 'ai')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
-                            `Ты проиграл >:D`, 
-                            message.author.avatarURL,
-                            `Я победил тебя за **${numberOfMoves + 1}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
-                            bot.colors.red, client)});
-                        if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
-                            `Ничья!`, 
-                            message.author.avatarURL,
-                            `И снова ничья?`,
-                            bot.colors.yellow, client)});
-                        message.reply('Укажите номер поля внизу (1-9)', {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
-                            const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
-                            collector.on('collect', msg => {
-                                collector.stop();
-                                const number = parseInt(msg.content)
-                                if (isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) {
-                                    return func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
-                                } else if (msg.content.toLowerCase() === 'end') return message.channel.send('Вы успешно остановили игру')
-
-                                jimp.read('https://cdn.discordapp.com/attachments/496235143443382272/524663994875641904/circle.png', (err, circle) => {
-                                    field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
-                                    currentField[number - 1] = 'player';
-                                    field.getBuffer(jimp.MIME_PNG, (error, newBuffer) => {
-                                        let newPosition = func.random(1, 9);
-                                        numberOfMoves++;
-                                        if (currentField[newPosition - 1]) {
-                                            while (currentField[newPosition - 1]) newPosition = func.random(1, 9);
-                                            move(currentField, field, newPosition, numberOfMoves)
-                                        }
-                                        else move(currentField, field, newPosition, numberOfMoves)
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        }
-        move(gameField, null, firstMove, 0);
-    }
+    if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
+    if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
+    //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
 
     if (command === 'help') {
         message.channel.send(func.embed(
@@ -380,6 +276,7 @@ client.on('message', message => {
 **${prefix}countries** \`[easy | medium | hard | impossible]\` - Угадай флаг страны
 **${prefix}capitals** \`[easy | medium | hard | impossible]\` - Угадай столицу страны
 **${prefix}ttt** - Крестики-нолики
+**${prefix}seabattle** - Морской бой
 **${prefix}rand** \`[n & n]\` - Генератор случайных чисел\n
 **Другие команды:**
 **${prefix}bug** \`<описание бага>\` - Если бот работает не так как должен, то вы можете написать об этом разработчику с помощью этой команды

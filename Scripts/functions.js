@@ -1,8 +1,19 @@
 const Discord = require('discord.js');
 const bot = require('../Storage/constants');
 
+/*module.exports.command = function (name, perms, correctArgs, message, command) {
+    if (!name.includes(command)) return;
+    if (!message.member.hasPermission(perms)) return module.exports.err('У вас недостаточно прав', null, message);
+    if (!correctArgs) return module.exports.err()
+}*/
+
 module.exports.random = function (min, max) {
     return Math.floor(Math.random() * (max + 1 - min)) + min;
+}
+
+module.exports.randomBoolean = function () { 
+    if (Math.random() > 0.5) return true;
+    else false;
 }
 
 module.exports.declOfNum = function (number, titles) {
@@ -33,4 +44,15 @@ module.exports.err = function (desc, perms, msg) {
     .setTimestamp();
     if (perms) embed.setDescription(`У вас нет права **${perms}**`);
     return msg.channel.send({embed});
+}
+
+module.exports.loading = function (text, client) {
+    const embed = new Discord.RichEmbed()
+    .setDescription(`**${text}** ${client.emojis.get(bot.emojis.typing)}`)
+    .setColor(bot.colors.discord);
+    return embed;
+}
+
+module.exports.isNum = function (number) {
+    return !isNaN(parseFloat(number)) && isFinite(number);
 }
