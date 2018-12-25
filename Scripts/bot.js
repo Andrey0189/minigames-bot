@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 const client = new Discord.Client({disableEveryone : true});
-const bot = require('../Storage/constants');
-const func = require('./functions');
-const tictactoe = require('./tictactoe');
-const seabattle = require('./seabattle');
+const bot = require('../Storage/constants.json');
+const func = require('./functions.js');
+const tictactoe = require('./tictactoe.js');
+const seabattle = require('./seabattle.js');
 //const chess = require('./chess');
 
 const prefix = '/';
