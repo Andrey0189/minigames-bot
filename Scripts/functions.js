@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const bot = require('../Storage/constants');
+const bot = require('../Storage/constants.json');
 
 /*module.exports.command = function (name, perms, correctArgs, message, command) {
     if (!name.includes(command)) return;
@@ -9,7 +9,7 @@ const bot = require('../Storage/constants');
 
 module.exports.random = function (min, max) {
     return Math.floor(Math.random() * (max + 1 - min)) + min;
-}
+} 
 
 module.exports.randomBoolean = function () { 
     if (Math.random() > 0.5) return true;
@@ -56,3 +56,17 @@ module.exports.loading = function (text, client) {
 module.exports.isNum = function (number) {
     return !isNaN(parseFloat(number)) && isFinite(number);
 }
+
+module.exports.avaibleToMove = (coordinatsFigure, coordinatsSet, field, arr) => {
+    const figure = arr[coordinatsFigure];
+    const whitePawns = [48, 49, 50, 51, 52, 53, 54, 55];
+    const blackPawns = [8, 9, 10, 11, 12, 13, 14, 15];
+
+    if (arr[coordinatsFigure].match(/черный/i)) jimp.read(bot.images.chess.blackPawn, (err, blackPawn) => jimp.read(bot.images.chess.blackHourse, (err, blackHourse) => jimp.read(bot.images.chess.blackEleph, (err, blackEleph) => jimp.read(bot.images.chess.blackLadya, (err, blackLadya) => jimp.read(bot.images.chess.blackFerz, (err, blackFerz) => jimp.read(bot.images.chess.blackKing, (err, blackKing) => {
+        if (figure.match(/пешка/i) && blackPawns.includes()) {
+
+        }
+    })))))); else jimp.read(bot.images.chess.blackPawn, (err, blackPawn) => jimp.read(bot.images.chess.blackHourse, (err, blackHourse) => jimp.read(bot.images.chess.blackEleph, (err, blackEleph) => jimp.read(bot.images.chess.blackLadya, (err, blackLadya) => jimp.read(bot.images.chess.blackFerz, (err, blackFerz) => jimp.read(bot.images.chess.blackKing, (err, blackKing) => {
+        
+    }))))));
+};

@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
-const client = new Discord.Client({disableEveryone : true});
+const hastebinGen = require('hastebin-gen');
+const client = new Discord.Client({disableEveryone: true});
 const bot = require('../Storage/constants.json');
 const func = require('./functions.js');
 const tictactoe = require('./tictactoe.js');
@@ -14,12 +15,20 @@ const bugsAndIdeas = '522729302073147392';
 
 let usedCommands = 0;
 let commandsPerHour = 0;
+let msgs = 0;
+
+Discord.Message.prototype.multipleReact = async function (arr) {
+    if (arr[0]) {
+        await this.react(arr.shift());
+        this.multipleReact(arr);
+    }
+}
 
 /** @namespace process.env.BOT_TOKEN */
 
 client.on('ready', () => {
     console.log(`Бот запущен.\nСервера: ${client.guilds.size}\nЮзеры: ${client.users.size}\nКаналы: ${client.channels.size}`);
-    client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : 1});
+    setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 120000)
     setInterval(() => commandsPerHour = 0, 3600000);
 });
 
@@ -34,7 +43,6 @@ client.on('guildCreate', (guild) => {
 Создана: **${guild.createdAt.toString().slice(4, -32)}**
 Иконка: ${guild.iconURL}
 **Это наш ${client.guilds.size}-ый сервер!**`, client);
-    client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`,{ type: 'PLAYING' });
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то наишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
@@ -49,11 +57,14 @@ client.on('guildDelete', (guild) => {
 Каналы: **${guild.channels.size}**
 Создана: **${guild.createdAt.toString().slice(4, -32)}**
 Иконка: ${guild.iconURL}`, client);
-    client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`,{ type: 'PLAYING' });
 });
 
 client.on('message', message => {
-    if(message.channel.type !== `text` || message.author.bot || !message.content.startsWith(bot.prefix)) return;
+    if(message.channel.type !== `text` || message.author.bot) return;
+
+    msgs++;
+
+    if (!message.content.startsWith(bot.prefix)) return;
 
     commandsPerHour++;
     usedCommands++;
@@ -224,7 +235,7 @@ client.on('message', message => {
             `Выпало число ${randomNum} :game_die:`,
             bot.colors.main, client
         ));
-    }
+    };
 
     if (command === 'update') {
         const update = args[0] || bot.version;
@@ -244,6 +255,7 @@ client.on('message', message => {
         .addField(`Пинг :ping_pong:`, `${Math.round(client.ping)} ms`, true)
         .addField('Использовано команд :wrench:', `${usedCommands} times`,  true)
         .addField('Команд за час :clock11:', `${commandsPerHour} per hour`, true)
+        .addField('Сообщений :envelope:', `${msgs} msgs`, true)
         .addField(`Юзеры :bust_in_silhouette:`, `${client.users.size} users`, true)
         .addField(`Каналы :keyboard:`, `${client.channels.size} channels`, true)
         .addField(`Сервера :desktop:`, `${client.guilds.size} servers`, true)
@@ -255,8 +267,22 @@ client.on('message', message => {
         .addField(`Шарды :gem:`, `${client.options.shardCount} shards`, true)
         .setColor(bot.colors.main);
         message.channel.send({embed});
-    }
+    };
 
+    if (command === 'eval') {
+
+        if (![bot.creatorID, '391592337685610496', '426338672342990850'].includes(message.author.id)) return func.err('Эта команда недоступна обычным пользователям', null, message);
+        const code = args.join(" "); //Константа с ботом
+
+        try {
+            let output = eval(code); //Константа с эмуляцией кода
+
+            if (output.length < 1950) message.author.send(`\`\`\`js\n${output}\n\`\`\``).then(() => {message.react("✅")}); //Отправка результатов симуляции
+            else message.author.send(`${output}`, {split:"\n", code:"js"}); //Отправка результатов симуляции если их длина больше 1950-ти
+        } catch (error) { message.author.send(`Анхэндлэд промайз риджекшн ворнинг \`\`\`js\n${error}\`\`\``).then(() => message.react("❎")) }; //Отправка ошибки
+        
+    }
+            
     if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
     if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
     //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
@@ -275,7 +301,7 @@ client.on('message', message => {
 **${prefix}rsp** \`<камень | ножницы | бумага>\` - Камень, ножницы, бумага
 **${prefix}countries** \`[easy | medium | hard | impossible]\` - Угадай флаг страны
 **${prefix}capitals** \`[easy | medium | hard | impossible]\` - Угадай столицу страны
-**${prefix}ttt** - Крестики-нолики
+**${prefix}ttt** \`[пользователь]\` - Крестики-нолики
 **${prefix}seabattle** - Морской бой
 **${prefix}rand** \`[n & n]\` - Генератор случайных чисел\n
 **Другие команды:**
@@ -290,6 +316,27 @@ client.on('message', message => {
             bot.colors.main, client
         ));
     };
+
+    if (message.author.id !== bot.creatorID) return;
+
+    if (command === 'guilds') {
+        const guildsCollection = client.guilds.sort((guild1, guild2) => { return guild2.memberCount-guild1.memberCount });
+        let guilds = [];
+        guildsCollection.forEach(guild => {
+            guilds.push(`
+            "Это ${guild.name}. Информация о серере:" {
+                "Основатель" : "${guild.owner.user.tag} (${guild.ownerID})"
+                "Акроним и ID" : "${guild.nameAcronym} | ${guild.id}"
+                "Пользователи" : "${guild.memberCount}"
+                "Каналы" : "${guild.channels.size}"
+                "Роли" : "${guild.roles.size}"
+                "Создана" : "${guild.createdAt.toString().slice(4, -33)}"
+                "Иконка" : "${guild.iconURL}"
+            }
+            `)
+        })
+        hastebinGen(guilds.join('\n========================================================\n\n'), 'json').then(link => message.channel.send(`Мои севрера --> ${link}`))
+    }
 });
 
 client.login(process.env.BOT_TOKEN);

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const bot = require('../Storage/constants.json');
-const func = require('./functions.js');
+const bot = require('../Storage/constants');
+const func = require('./functions');
 const jimp = require('jimp');
 
 module.exports.run = function (message, args, client) {
@@ -8,9 +8,12 @@ module.exports.run = function (message, args, client) {
 
     let firstField = new Array(100);
     let secondField = new Array(100);
+    const voidArr = new Array(100);
 
     const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    const user = message.mentions.members.first();
 
     //piadap - Putting images an definding array position
     function piadap(x, y, shift, generation) {
@@ -44,7 +47,7 @@ module.exports.run = function (message, args, client) {
             if (horisontal) definder = piadap(xLefter, y, shift, true)[2];
             else definder = piadap(x, yHigher, shift, true)[2];
 
-            const numbersToCheck = [0, 1, -1, 10, -10, 11, -11, 9, -1];
+            const numbersToCheck = [0, 1, -1, 10, -10, 11, -11, 9, -9];
             for (let i in numbersToCheck) if (field[definder + numbersToCheck[i]]) return settingShips(field, img, shipsToSet, ship, show);
         }
 
@@ -63,7 +66,7 @@ module.exports.run = function (message, args, client) {
 
     function calculatingWin (field) { if (!field.find(sq => sq === true)) return true };
 
-    function move (arrPlr, arrBot, field, attaked) {
+    function move (arrPlr, arrBot, field, attacked, attackedPlr) {
         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 300000 });
         collector.on('collect', msg => {
             collector.stop();
@@ -75,19 +78,19 @@ module.exports.run = function (message, args, client) {
             let hitPlr = false;
             let hitBot = false;
 
-            if (msg.content.match(/[a-z][0-9]/i)) {
+            if (msg.content.match(/\/?[a-j][0-9]/i) && !msg.content.startsWith(bot.prefix)) {
                 yPlr = msg.content[0].toLowerCase();
                 xPlr = parseInt(msg.content[1]);
-            } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру')
+            } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply(`Вы успешно остановили игру. Если это опроизошло по ошибке, то скорее всего ваше сообщение начиналось с \`${bot.prefix}\``)
              else {
                 func.err(`Неправильно значение. Правильное использование: ${letters[func.random(0, letters.length - 1)]+numbers[func.random(0, numbers.length - 1)]}`, null, message);
-                return move(arrPlr, arrBot, field, attaked);
+                return move(arrPlr, arrBot, field, attacked, attackedPlr);
             };
 
             let xBot = numbers[func.random(0, numbers.length - 1)];
             let yBot = letters[func.random(0, letters.length - 1)];
 
-            if (attaked[piadap(xBot, yBot, 1100)[2]]) while (attaked[piadap(xBot, yBot, 1100)[2]]) {
+            if (attacked[piadap(xBot, yBot, 1100)[2]]) while (attacked[piadap(xBot, yBot, 1100)[2]]) {
                 xBot = numbers[func.random(0, numbers.length - 1)];
                 yBot = letters[func.random(0, letters.length - 1)];
             }
@@ -110,12 +113,13 @@ module.exports.run = function (message, args, client) {
                     jimp.read(bot.images.sb.blast, (err, blast) => {
                         jimp.read(bot.images.sb.target, (err, target) => {
                             if (hitPlr) {
-                                arrBot[coordinatsPlr[2]] = undefined;
+                                arrBot[coordinatsPlr[2]] = null;
                                 field.composite(ship, coordinatsPlr[0], coordinatsPlr[1]);
                                 field.composite(blast, coordinatsPlr[0], coordinatsPlr[1]);
-                            } else field.composite(dot, coordinatsPlr[0], coordinatsPlr[1]);
+                            } else if (!attackedPlr[coordinatsPlr[2]]) field.composite(dot, coordinatsPlr[0], coordinatsPlr[1]);
+
                             if (hitBot) {
-                                arrPlr[coordinatsBot[2]] = undefined;
+                                arrPlr[coordinatsBot[2]] = null;
                                 field.composite(blast, coordinatsBot[0], coordinatsBot[1]);
                             } else field.composite(dot, coordinatsBot[0], coordinatsBot[1]);
 
@@ -125,15 +129,16 @@ module.exports.run = function (message, args, client) {
 
                                 message.channel.send(`Укажите внизу букву (a-j) и цифру. Например: \`h6\`. Напишите \`end\` чтобы закончить`, { files: [{ name: 'field.png', attachment: buffer }], embed: embed});
                                 
-                                attaked[coordinatsBot[2]] = true;
-                                move(arrPlr, arrBot, field, attaked);
+                                attacked[coordinatsBot[2]] = 1;
+                                attackedPlr[coordinatsPlr[2]] = 1;
+                                move(arrPlr, arrBot, field, attacked, attackedPlr);
                             });
                         })
                     })
                 })
             })
         });
-    }
+    };
 
     jimp.read(bot.images.sb.field, (err, field) => {
         if (err) throw err;
@@ -152,7 +157,9 @@ module.exports.run = function (message, args, client) {
                 field.getBuffer(jimp.MIME_PNG, (err, buffer) => {
                 msg.delete();
                 message.channel.stopTyping();
-                return message.channel.send({files: [{ name: 'field.png', attachment: buffer }]}).then(() => move(firstField, secondField, field, new Array(100)));
+                return message.channel.send(`${message.author} Укажите букву и цифру. Например: \`h6\`. Или напишите \`end\` чтобы закончить`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    move(firstField, secondField, field, voidArr, voidArr);
+                }); 
             });
             })
         })
