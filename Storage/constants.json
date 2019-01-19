@@ -23,7 +23,21 @@
     "emojis" : {
         "yoba" : "522739254825058304",
         "rock" : "522738393566937089",
-        "typing" : "526365694183342087"
+        "typing" : "526365694183342087",
+
+        "whitePawn" : "527399844093100042",
+        "whiteHourse" : "527399872521961482",
+        "whiteEleph" : "527399891962691584",
+        "whiteLadya" : "527399926838067200",
+        "whiteFerz" : "527399969469235200",
+        "whiteKing" : "527400008144650280",
+
+        "blackPawn" : "527400035776856065",
+        "blackHourse" : "527400068345626625",
+        "blackEleph" : "527400077363511296",
+        "blackLadya" : "527400087299817484",
+        "blackFerz" : "527400003105107828",
+        "blackKing" : "527400109890207755"
     },
     "images" : {
         "ttt" : {
@@ -42,7 +56,9 @@
         },
 
         "chess" : {
-            "field" : "https://cdn.discordapp.com/attachments/524159437464797184/527131625838870528/chessField.png",
+            "field" : "https://cdn.discordapp.com/attachments/524159437464797184/527395245386629121/chessField.png",
+            "blackSquare" : "https://cdn.discordapp.com/attachments/524159437464797184/527417268842397716/blackSquare.png",
+            "whiteSquare" : "https://cdn.discordapp.com/attachments/524159437464797184/527417312878395410/whiteSquare.png",
             "blackPawn" : "https://cdn.discordapp.com/attachments/524159437464797184/527131436382158879/blackPawn.png",
             "blackHourse" : "https://cdn.discordapp.com/attachments/524159437464797184/527131380858224641/blackHourse.png",
             "blackEleph" : "https://cdn.discordapp.com/attachments/524159437464797184/527131309282295809/blackEleph.png",
