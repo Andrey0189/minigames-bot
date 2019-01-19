@@ -9,9 +9,9 @@ const seabattle = require('./seabattle.js');
 
 const prefix = '/';
 
-const serverLeaveJoin = '522729281349222410';
-const commandsUsing = '522729347417767946';
-const bugsAndIdeas = '522729302073147392';
+const serverLeaveJoin = '536187820243550228';
+const commandsUsing = '536187872655704074';
+const bugsAndIdeas = '536187892968587285';
 
 let usedCommands = 0;
 let commandsPerHour = 0;
@@ -324,18 +324,17 @@ client.on('message', message => {
         let guilds = [];
         guildsCollection.forEach(guild => {
             guilds.push(`
-            "Это ${guild.name}. Информация о серере:" {
-                "Основатель" : "${guild.owner.user.tag} (${guild.ownerID})"
-                "Акроним и ID" : "${guild.nameAcronym} | ${guild.id}"
-                "Пользователи" : "${guild.memberCount}"
-                "Каналы" : "${guild.channels.size}"
-                "Роли" : "${guild.roles.size}"
-                "Создана" : "${guild.createdAt.toString().slice(4, -33)}"
-                "Иконка" : "${guild.iconURL}"
-            }
+            Это ${guild.name}. Информация о серере:
+                Основатель: ${guild.owner.user.tag} (${guild.ownerID})
+                Акроним и ID: ${guild.nameAcronym} | ${guild.id}
+                Пользователи: ${guild.memberCount}
+                Каналы: ${guild.channels.size}
+                Роли: ${guild.roles.size}
+                Создана: ${guild.createdAt.toString().slice(4, -33)}
+                Иконка: ${guild.iconURL}
             `)
         })
-        hastebinGen(guilds.join('\n========================================================\n\n'), 'json').then(link => message.channel.send(`Мои севрера --> ${link}`))
+        hastebinGen(guilds.join('\n========================================================\n\n'), 'txt').then(link => message.channel.send(`Мои севрера --> ${link}`))
     }
 });
 
