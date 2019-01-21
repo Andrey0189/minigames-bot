@@ -125,13 +125,13 @@ module.exports.run = function (message, args, client) {
 
                             field.getBuffer(jimp.MIME_PNG, (err, buffer) => {
                                 if (calculatingWin(arrPlr)) return message.channel.send('Ты проиграл >:D', { files: [{ name: 'field.png', attachment: buffer }], embed: func.embed('Ты проиграл >:D', client.user.avatarURL, 'В следующий раз повезет!', bot.colors.red, client)});
-                                if (calculatingWin(arrBot)) return message.channel.send('Ты победил!', { files: [{ name: 'field.png', attachment: buffer }], embed: func.embed('Ты победил!', message.author.avatarURL, 'Мои поздравления!', bot.colors.green, client)});
+                                if (calculatingWin(arrBot)) return message.channel.send('Ты победил!', { files: [{ name: 'field.png', attachment: buffer }], embed: func.embed('ПОБЕДА!', message.author.avatarURL, 'Мои поздравления!', bot.colors.green, client)});
 
                                 message.channel.send(`Укажите внизу букву (a-j) и цифру. Например: \`h6\`. Напишите \`end\` чтобы закончить`, { files: [{ name: 'field.png', attachment: buffer }], embed: embed});
                                 
                                 attacked[coordinatsBot[2]] = 1;
                                 attackedPlr[coordinatsPlr[2]] = 1;
-                                move(arrPlr, arrBot, field, attacked, attackedPlr);
+                                return move(arrPlr, arrBot, field, attacked, attackedPlr);
                             });
                         })
                     })
