@@ -71,15 +71,15 @@ module.exports.run = function (message, args, client,) {
             if (img) field = img;
             jimp.read(link, (err, figure) => {
                 field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
-                    message.channel.send(`${playerMention}, твой ход. Укажите номер поля внизу (1-9)\nX - ${firstMention.username}\nO - ${secondMention.username}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    message.channel.send(`${playerMention}, твой ход. Укажите номер поля внизу (1-9)\nX - ${firstMention.username}\nO - ${secondMention.username}`, {files: [{ name: 'field.png', attachment: buffer }]}).then((messagee) => {
                         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === currentPlayer, { time: 60000 });
                         collector.on('collect', msg => {
                             collector.stop();
                             const number = parseInt(msg.content)
                             if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
-                                return moveWithOpponent(currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);
-                            } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру');
+                                return moveWithOpponent(currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer) && messagee.delete(1);
+                            } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру').then((messagee) => { messagee.delete(1500) });
                             field.composite(figure, puttingImages(number)[0], puttingImages(number)[1]);
                             currentField[number - 1] = currentPlayer;
                             field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
@@ -132,7 +132,7 @@ module.exports.run = function (message, args, client,) {
                         message.author.avatarURL,
                         `И снова ничья?`,
                         bot.colors.yellow, client)});
-                    message.reply(`Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    message.reply(`Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then((messagee) => {
                         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                         collector.on('collect', msg => {
                             collector.stop();
@@ -140,8 +140,8 @@ module.exports.run = function (message, args, client,) {
                             if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                            } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру')
-
+                            } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру').then((messagee) => { messagee.delete(1500) });
+                            messagee.delete(1);
                             jimp.read(bot.images.ttt.circle, (err, circle) => {
                                 field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                 currentField[number - 1] = 'player';
@@ -166,18 +166,19 @@ module.exports.run = function (message, args, client,) {
         if (opponent.user.bot) return func.err('Соперник не может быть ботом', null, message);
         if (opponent.user.presence.status === 'offline') return func.err(`${opponent} не в сети`, null, message);
         if (opponent.id === message.author.id) return func.err('Оу, у тебя нет друзей :(', null, message);
-        message.channel.send(`${opponent}, Вы хотите сыграть в крестики-нолики с ${message.author}? Ответьте \`+\`, если хотите сыграть, ответьте \`-\` если нет`).then(() => {
+        message.channel.send(`${opponent}, Вы хотите сыграть в крестики-нолики с ${message.author}? Ответьте \`+\`, если хотите сыграть, ответьте \`-\` если нет`).then((messagee) => {
             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === opponent.id, { time: 60000 });                  
             collector.on('collect', msg => {
                 collector.stop();
-                if (!['+', 'Да', 'Yes'].includes(msg.content.toLowerCase())) return message.reply(`К сожалению ${opponent} отказался с вами играть`);
+                if (!['+', 'Да', 'Yes'].includes(msg.content.toLowerCase())) return message.reply(`К сожалению ${opponent} отказался с вами играть`).then((messagee) => { messagee.delete(1500) });
                 else {
+                    messagee.delete(1);
                     message.channel.send(func.embed(
                         `Кто пойдет первым?`,
                         message.author.avatarURL,
                         `**1 - ${opponent}\n2 - ${message.author}**\nУкажите цифру внизу`,
                         bot.colors.main, client
-                    )).then(() => {
+                    )).then((messagee) => {
                         function choosing () {
                             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                             collector.on('collect', msg => {
@@ -188,10 +189,12 @@ module.exports.run = function (message, args, client,) {
                                 if (num === 1) {
                                     firstPlayer = opponent.id
                                     secondPlayer = message.author.id
+                                    messagee.delete(1);
                                     return moveWithOpponent(gameField, null, 0, firstPlayer, secondPlayer, firstPlayer);
                                 } else if (num === 2) {
                                     firstPlayer = message.author.id
                                     secondPlayer = opponent.id
+                                    messagee.delete(1);
                                     return moveWithOpponent(gameField, null, 0, firstPlayer, secondPlayer, firstPlayer);
                                 } else {
                                     func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
@@ -213,14 +216,14 @@ module.exports.run = function (message, args, client,) {
             message.author.avatarURL,
             `**1 - ${message.author}\n2 - ${opponent}**\nУкажите цифру внизу`,
             bot.colors.main, client
-        )).then(() => {
+        )).then((messagee) => {
             function choosing () {
                 const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                 collector.on('collect', msg => {
                     collector.stop();
                     const num = parseInt(msg.content);
-                    if (num === 1) move(gameField, null, firstMove, 0, num);
-                    else if (num === 2) move(gameField, null, firstMove, 0, num, true);
+                    if (num === 1) move(gameField, null, firstMove, 0, num) && messagee.delete(1);
+                    else if (num === 2) move(gameField, null, firstMove, 0, num, true) && messagee.delete(1);
                     else {
                         func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
                         return choosing();
