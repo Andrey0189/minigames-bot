@@ -37,8 +37,6 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 };*/
 
-Discord.TextChannel.prototype.fetchMessages()
-
 /** @namespace process.env.BOT_TOKEN */
 
 client.on('ready', () => {
