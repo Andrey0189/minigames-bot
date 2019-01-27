@@ -24,6 +24,21 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 }
 
+Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection()) {
+    if (int >= 100) {
+        const d = await this.fetchMessages({limit: 99});
+        d.forEach((data, id) => arr.set(id, data));
+        return await this.betterFetch(int - 99, arr);
+    } else {
+        const d = await this.fetchMessages({limit: int});
+        d.forEach((data, id) => arr.set(id, data));
+        console.log(arr);
+        return arr;
+    }
+};
+
+Discord.TextChannel.prototype.fetchMessages()
+
 /** @namespace process.env.BOT_TOKEN */
 
 client.on('ready', () => {
@@ -33,16 +48,19 @@ client.on('ready', () => {
 });
 
 client.on('guildCreate', (guild) => {
-    func.send(serverLeaveJoin, `
-Я **пришел** :inbox_tray: на сервер **${guild.name}**. Информация о нем:
-Акроним и ID: **${guild.nameAcronym} | ${guild.id}**
-Основатель: **${guild.owner} (\`${guild.owner.user.tag}\`)**
-Количество участников: **${guild.memberCount}**
-Роли: **${guild.roles.size}**
-Каналы: **${guild.channels.size}**
-Создана: **${guild.createdAt.toString().slice(4, -32)}**
-Иконка: ${guild.iconURL}
-**Это наш ${client.guilds.size}-ый сервер!**`, client);
+    let msgCount = 0;
+    guild.channels.forEach(channel => {
+        if (channel.type === 'text') channel.betterFetch(1e8).then(msgs => msgCount += msgs.size);
+        console.log(msgs.size)
+    })
+    func.send(serverLeaveJoin, func.embed(
+        'New server information',
+        null,
+        `
+Name: \`${guild.name}\`
+Objects count: [\`${guild.memberCount} members/${guild.roles.size} roles/ ${guild.channels.size}\`]
+Messages count: `
+    ), client);
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то наишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
@@ -76,7 +94,7 @@ client.on('message', message => {
         message.author.tag, message.author.avatarURL,
         `**${message.author.tag}** использовал команду **${bot.prefix}${command}** ${(args[0]? `\`${args.join(' ')}\`` : '')} на сервере **${message.guild.name}**`, bot.colors.green, client
     ), client);
-        
+ 
     if (['rsp', 'кнб'].includes(command)) {
         let choice = args[0];
 
@@ -284,7 +302,7 @@ client.on('message', message => {
     }
             
     if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
-    if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
+    //if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
     //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
 
     if (command === 'help') {
