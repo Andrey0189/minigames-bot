@@ -57,8 +57,8 @@ client.on('guildCreate', (guild) => {
         `
 Name: \`${guild.name}\`
 Objects count: [\`${guild.memberCount} members/${guild.roles.size} roles/ ${guild.channels.size}\`]
-Owner: \`${guild.owner} [${guild.owner.user.tag}]\``
-    ), client);
+Owner: \`${guild.owner} [${guild.owner.user.tag}]\``, bot.colors.green, client
+    ));
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то наишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
