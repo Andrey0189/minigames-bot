@@ -24,7 +24,7 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 }
 
-Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection()) {
+/*Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection()) {
     if (int >= 100) {
         const d = await this.fetchMessages({limit: 99});
         d.forEach((data, id) => arr.set(id, data));
@@ -35,7 +35,7 @@ Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Disco
         console.log(arr);
         return arr;
     }
-};
+};*/
 
 Discord.TextChannel.prototype.fetchMessages()
 
@@ -59,7 +59,7 @@ client.on('guildCreate', (guild) => {
         `
 Name: \`${guild.name}\`
 Objects count: [\`${guild.memberCount} members/${guild.roles.size} roles/ ${guild.channels.size}\`]
-Messages count: `
+Owner: \`${guild.owner} [${guild.owner.user.tag}]\``
     ), client);
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то наишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
@@ -320,7 +320,6 @@ client.on('message', message => {
 **${prefix}countries** \`[easy | medium | hard | impossible]\` - Угадай флаг страны
 **${prefix}capitals** \`[easy | medium | hard | impossible]\` - Угадай столицу страны
 **${prefix}ttt** \`[пользователь]\` - Крестики-нолики
-**${prefix}seabattle** - Морской бой
 **${prefix}rand** \`[n & n]\` - Генератор случайных чисел\n
 **Другие команды:**
 **${prefix}bug** \`<описание бага>\` - Если бот работает не так как должен, то вы можете написать об этом разработчику с помощью этой команды
