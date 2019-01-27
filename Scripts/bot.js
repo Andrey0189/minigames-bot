@@ -47,10 +47,10 @@ client.on('ready', () => {
 
 client.on('guildCreate', (guild) => {
     let msgCount = 0;
-    guild.channels.forEach(channel => {
+    /*.channels.forEach(channel => {
         if (channel.type === 'text') channel.betterFetch(1e8).then(msgs => msgCount += msgs.size);
         console.log(msgs.size)
-    })
+    })*/
     func.send(serverLeaveJoin, func.embed(
         'New server information',
         null,
