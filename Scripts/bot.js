@@ -57,11 +57,11 @@ Name: \`${guild.name}\`
 ID: \`${guild.id}\`
 Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
 Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
-Created at: ${guild.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+Created at: ${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
     .setColor(bot.colors.green)
     .setThumbnail(guild.iconURL)
     .setFooter(`This is our ${client.guilds.size} server`)
-func.send(serverLeaveJoin, embed, client);
+    func.send(serverLeaveJoin, embed, client);
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то напишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
@@ -73,7 +73,7 @@ Name: \`${guild.name}\`
 ID: \`${guild.id}\`
 Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
 Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
-Created at: ${guild.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+Created at: ${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
     .setColor(bot.colors.red)
     .setThumbnail(guild.iconURL)
     .setFooter(`Bye bye...`)
