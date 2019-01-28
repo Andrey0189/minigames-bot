@@ -24,18 +24,23 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 }
 
-/*Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection()) {
+addCommas = (int) => int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection(), lastMessage) {
+    let obj = {limit: 99};
+    if (lastMessage) obj.before = lastMessage;
+
     if (int >= 100) {
-        const d = await this.fetchMessages({limit: 99});
+        const d = await this.fetchMessages(obj);
         d.forEach((data, id) => arr.set(id, data));
-        return await this.betterFetch(int - 99, arr);
+        return await this.betterFetch(int - 99, arr, arr.last().id);
     } else {
-        const d = await this.fetchMessages({limit: int});
+        obj.limit = int;
+        const d = await this.fetchMessages(obj);
         d.forEach((data, id) => arr.set(id, data));
-        console.log(arr);
         return arr;
     }
-};*/
+};
 
 /** @namespace process.env.BOT_TOKEN */
 
@@ -46,32 +51,34 @@ client.on('ready', () => {
 });
 
 client.on('guildCreate', (guild) => {
-    let msgCount = 0;
-    /*.channels.forEach(channel => {
-        if (channel.type === 'text') channel.betterFetch(1e8).then(msgs => msgCount += msgs.size);
-        console.log(msgs.size)
-    })*/
-    func.send(serverLeaveJoin, func.embed(
-        'New server information',
-        null,
-        `
+    const embed = new Discord.RichEmbed()
+    .addField(':inbox_tray: New server information', `
 Name: \`${guild.name}\`
-Objects count: [\`${guild.memberCount} members/${guild.roles.size} roles/ ${guild.channels.size}\`]
-Owner: \`${guild.owner} [${guild.owner.user.tag}]\``, bot.colors.green, client), client);
+ID: \`${guild.id}\`
+Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
+Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
+Created at: ${guild.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+    .setColor(bot.colors.green)
+    .setThumbnail(guild.iconURL)
+    .setFooter(`This is our ${client.guilds.size} server`)
+func.send(serverLeaveJoin, embed, client);
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
-    if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то наишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
+    if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то напишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
 
 client.on('guildDelete', (guild) => {
-    func.send(serverLeaveJoin, `
-Я **покинул** :outbox_tray: сервер **${guild.name}**. Информация о нем:
-Акроним и ID: **${guild.nameAcronym} | ${guild.id}**
-Основатель: **${guild.owner} (\`${guild.owner.user.tag}\`)**
-Количество участников: **${guild.memberCount}**
-Роли: **${guild.roles.size}**
-Каналы: **${guild.channels.size}**
-Создана: **${guild.createdAt.toString().slice(4, -32)}**
-Иконка: ${guild.iconURL}`, client);
+    const embed = new Discord.RichEmbed()
+    .addField(':outbox_tray: OH NO WE LEFT THE SERVER!!!', `
+Name: \`${guild.name}\`
+ID: \`${guild.id}\`
+Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
+Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
+Created at: ${guild.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+    .setColor(bot.colors.red)
+    .setThumbnail(guild.iconURL)
+    .setFooter(`Bye bye...`)
+
+    func.send(serverLeaveJoin, embed, client);
 });
 
 client.on('message', message => {
@@ -324,6 +331,7 @@ client.on('message', message => {
 **${prefix}invite** - Ссылка на приглашение бота
 **${prefix}creator** - Узнать создателя бота
 **${prefix}update** \`[n.n.n]\` - Узнать что было добавлено в новом обновлении\n
+**Нравится бот? Поддержите автора донатом и получите кучу плюшек на официальном сервере!** https://qiwi.me/andreybots
 **Получить больше помощи можно тут:** https://discord.gg/NvcAKdt
 `,
 
@@ -348,7 +356,8 @@ client.on('message', message => {
                 Иконка: ${guild.iconURL}
             `)
         })
-        hastebinGen(guilds.join('\n========================================================\n\n'), 'txt').then(link => message.channel.send(`Мои севрера --> ${link}`))
+        try { hastebinGen(guilds.join('\n========================================================\n\n'), 'txt').then(link => message.channel.send(`Мои севрера --> ${link}`)) }
+        catch (err) { message.channel.send(`Сарян, ащипка)0))\`\`\`js\n${err}\n\`\`\``) };
     }
 });
 
