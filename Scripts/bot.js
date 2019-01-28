@@ -4,7 +4,7 @@ const client = new Discord.Client({disableEveryone: true});
 const bot = require('../Storage/constants.json');
 const func = require('./functions.js');
 const tictactoe = require('./tictactoe.js');
-const seabattle = require('./seabattle.js');
+//const seabattle = require('./seabattle.js');
 //const chess = require('./chess');
 
 const prefix = '/';
@@ -56,8 +56,8 @@ client.on('guildCreate', (guild) => {
 Name: \`${guild.name}\`
 ID: \`${guild.id}\`
 Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
-Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
-Created at: ${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+Owner: ${guild.owner.user} \`${guild.owner.user.tag}\`
+Created at: \`${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')}\``)
     .setColor(bot.colors.green)
     .setThumbnail(guild.iconURL)
     .setFooter(`This is our ${client.guilds.size} server`)
@@ -72,8 +72,8 @@ client.on('guildDelete', (guild) => {
 Name: \`${guild.name}\`
 ID: \`${guild.id}\`
 Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
-Owner: ${guild.owner.user}, \`${guild.owner.user.tag}\`
-Created at: ${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')} `)
+Owner: ${guild.owner.user} \`${guild.owner.user.tag}\`
+Created at: \`${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '.')}\``)
     .setColor(bot.colors.red)
     .setThumbnail(guild.iconURL)
     .setFooter(`Bye bye...`)
