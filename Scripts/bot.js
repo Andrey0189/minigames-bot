@@ -4,7 +4,7 @@ const client = new Discord.Client({disableEveryone: true});
 const bot = require('../Storage/constants.json');
 const func = require('./functions.js');
 const tictactoe = require('./tictactoe.js');
-//const seabattle = require('./seabattle.js');
+const seabattle = require('./seabattle.js');
 //const chess = require('./chess');
 
 const prefix = '/';
@@ -24,7 +24,7 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 }
 
-addCommas = (int) => int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const addCommas = (int) => `\`${int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}\``;
 
 Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection(), lastMessage) {
     let obj = {limit: 99};
@@ -48,6 +48,27 @@ client.on('ready', () => {
     console.log(`Бот запущен.\nСервера: ${client.guilds.size}\nЮзеры: ${client.users.size}\nКаналы: ${client.channels.size}`);
     setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 120000)
     setInterval(() => commandsPerHour = 0, 3600000);
+
+    setInterval(() => {
+        client.channels.get('539737874032230437').fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
+        .setTitle(`Бот "${bot.name}"`)
+        .setThumbnail(client.user.avatarURL)
+        .addField(`Пинг :ping_pong:`, `${addCommas(Math.round(client.ping))} ms`, true)
+        .addField('ОЗУ :gear:', `${addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/\`1,024 МБ\``, true)
+        .addField('Использовано команд :wrench:', `${addCommas(usedCommands)} times`,  true)
+        .addField('Команд за час :clock11:', `${addCommas(commandsPerHour)} per hour`, true)
+        .addField('Сообщений :envelope:', `${addCommas(msgs)} msgs`, true)
+        .addField(`Юзеры :bust_in_silhouette:`, `${addCommas(client.users.size)} users`, true)
+        .addField(`Каналы :keyboard:`, `${addCommas(client.channels.size)} channels`, true)
+        .addField(`Сервера :desktop:`, `${addCommas(client.guilds.size)} servers`, true)
+        .addField(`Эмодзи :joy:`, `${addCommas(client.emojis.size)} emojis`, true)
+        .addField(`Голосовые каналы :microphone:`, `${addCommas(client.voiceConnections.size)} channels`, true)
+        .addField(`Время работы :stopwatch:`, `${addCommas(Math.round(client.uptime / (1000 * 60 * 60)))} hours, ${addCommas(Math.round(client.uptime / (1000 * 60)) % 60)} minutes`, true)
+        .addField(`Включен :on:`, client.readyAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}), true)
+        .addField(`Версия :floppy_disk:`, bot.version, true)
+        .addField(`Авторизация :key:`, client.user.tag, true)
+        .setColor('af00ff')));
+    }, 16000);
 });
 
 client.on('guildCreate', (guild) => {
@@ -161,7 +182,7 @@ client.on('message', message => {
         if (countriesCmd.includes(command)) {variants = countries; answers = flags; minigameName = 'Угадай флаг страны'; question = 'Какой флаг у страны'};
         if (capitalsCmd.includes(command)) {variants = countries; answers = capitals; minigameName = 'Угадай столицу страны'; question = 'Какая столица у страны'};
 
-        if (['e', 'easy', 'л', 'легко'].includes(args[0])) {seconds = 60; numberOfVariants = 3}
+        if (['e', 'easy', 'л', 'легко'].includes(args[0])) {seconds = 20; numberOfVariants = 3}
         else if (['h', 'hard', 'сл', 'сложно'].includes(args[0])) {seconds = 15; numberOfVariants = 12}
         else if (['i', 'impossible', 'н', 'невозможно'].includes(args[0])) {seconds = 20; numberOfVariants = 24}
         else {seconds = 10; numberOfVariants = 6};
@@ -269,27 +290,6 @@ client.on('message', message => {
             bot.colors.main, client
         ));
     }
-
-    if (command === 'info') {
-        const embed = new Discord.RichEmbed()
-        .setTitle(`Бот "${bot.name}"`)
-        .setThumbnail(client.user.avatarURL)
-        .addField(`Пинг :ping_pong:`, `${Math.round(client.ping)} ms`, true)
-        .addField('Использовано команд :wrench:', `${usedCommands} times`,  true)
-        .addField('Команд за час :clock11:', `${commandsPerHour} per hour`, true)
-        .addField('Сообщений :envelope:', `${msgs} msgs`, true)
-        .addField(`Юзеры :bust_in_silhouette:`, `${client.users.size} users`, true)
-        .addField(`Каналы :keyboard:`, `${client.channels.size} channels`, true)
-        .addField(`Сервера :desktop:`, `${client.guilds.size} servers`, true)
-        .addField(`Время работы :stopwatch:`, `${Math.round(client.uptime / (1000 * 60 * 60))} hours, ${Math.round(client.uptime / (1000 * 60)) % 60} minutes`, true)
-        .addField(`Включен :on:`, client.readyAt.toString().slice(4, -32), true)
-        .addField(`Версия :floppy_disk:`, bot.version, true)
-        .addField(`Авторизация :key:`, client.user.tag, true)
-        .addField(`Голосовые каналы :microphone:`, `${client.voiceConnections.size} channels`, true)
-        .addField(`Шарды :gem:`, `${client.options.shardCount} shards`, true)
-        .setColor(bot.colors.main);
-        message.channel.send({embed});
-    };
 
     if (command === 'eval') {
 
