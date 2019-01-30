@@ -142,7 +142,7 @@ module.exports.run = function (message, args, client,) {
                                 return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
                             } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру')
                             
-                            message.delete();
+                            msg.delete();
 
                             jimp.read(bot.images.ttt.circle, (err, circle) => {
                                 field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
