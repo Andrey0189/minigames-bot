@@ -105,7 +105,7 @@ module.exports.run = function (message, args, client,) {
         });
     };
 
-    function move (currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst) {
+    function move (currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst, msg) {
         jimp.read(bot.images.ttt.field, (err, field) => {
             if (err) throw err;
             if (img) field = img;
@@ -117,31 +117,33 @@ module.exports.run = function (message, args, client,) {
                     currentField[position - 1] = 'ai';
                 }
                 field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
-                    if (calculatingWin(currentField, 'player')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
+                    if (calculatingWin(currentField, 'player')) return msg.edit({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                         `Ты выиграл!`, 
                         message.author.avatarURL,
                         `Ты совершил это за **${numberOfMoves}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
                         bot.colors.green, client)});
-                    if (calculatingWin(currentField, 'ai')) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
+                    if (calculatingWin(currentField, 'ai')) return msg.edit({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                         `Ты проиграл >:D`, 
                         message.author.avatarURL,
                         `Я победил тебя за **${numberOfMoves + 1}** ${func.declOfNum(numberOfMoves, ['ход', 'хода', 'ходов'])}`,
                         bot.colors.red, client)});
-                    if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
+                    if (!currentField.includes(undefined)) return msg.edit({files: [{ name: 'field.png', attachment: buffer }], embed : func.embed(
                         `Ничья!`, 
                         message.author.avatarURL,
                         `И снова ничья?`,
                         bot.colors.yellow, client)});
-                    message.reply(`Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    msg.edit(`${message.author}, Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
                         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                         collector.on('collect', msg => {
                             collector.stop();
                             const number = parseInt(msg.content)
                             if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
-                                return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                            } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру')
-
+                                return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst, msg);
+                            } else if (msg.content.toLowerCase() === 'end' || message.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру')
+                            
+                            message.delete();
+                            
                             jimp.read(bot.images.ttt.circle, (err, circle) => {
                                 field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
                                 currentField[number - 1] = 'player';
@@ -151,9 +153,9 @@ module.exports.run = function (message, args, client,) {
                                     aiMovingFirst++;
                                     if (currentField[newPosition - 1] && aiMovingFirst !== 6) {
                                         while (currentField[newPosition - 1]) newPosition = func.random(1, 9);
-                                        return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst)
+                                        return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst, msg);
                                     }
-                                    else return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst)
+                                    else return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst, msg);
                                 });
                             });
                         });
@@ -194,8 +196,7 @@ module.exports.run = function (message, args, client,) {
                                     secondPlayer = opponent.id
                                     return moveWithOpponent(gameField, null, 0, firstPlayer, secondPlayer, firstPlayer);
                                 } else {
-                                    func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
-                                    return choosing();
+                                    return func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
                                 }
                             });
                         }
@@ -219,11 +220,10 @@ module.exports.run = function (message, args, client,) {
                 collector.on('collect', msg => {
                     collector.stop();
                     const num = parseInt(msg.content);
-                    if (num === 1) move(gameField, null, firstMove, 0, num);
-                    else if (num === 2) move(gameField, null, firstMove, 0, num, true);
+                    if (num === 1) move(gameField, null, firstMove, 0, num, msg);
+                    else if (num === 2) move(gameField, null, firstMove, 0, num, true, msg);
                     else {
-                        func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
-                        return choosing();
+                        return func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
                     }
                 })
             }
