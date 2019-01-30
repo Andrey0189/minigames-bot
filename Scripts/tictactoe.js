@@ -215,19 +215,16 @@ module.exports.run = function (message, args, client,) {
             `**1 - ${message.author}\n2 - ${opponent}**\nУкажите цифру внизу`,
             bot.colors.main, client
         )).then(msgBot => {
-            function choosing () {
-                const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
-                collector.on('collect', msg => {
-                    collector.stop();
-                    const num = parseInt(msg.content);
-                    if (num === 1) move(gameField, null, firstMove, 0, num, msgBot);
-                    else if (num === 2) move(gameField, null, firstMove, 0, num, true, msgBot);
-                    else {
-                        return func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
-                    }
-                })
-            }
-            choosing();
+            const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
+            collector.on('collect', msg => {
+                collector.stop();
+                const num = parseInt(msg.content);
+                if (num === 1) move(gameField, null, firstMove, 0, num, false, msgBot);
+                else if (num === 2) move(gameField, null, firstMove, 0, num, true, msgBot);
+                else {
+                    return func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
+                }
+            })
         })
     }
 }
