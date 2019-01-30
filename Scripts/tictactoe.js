@@ -179,7 +179,7 @@ module.exports.run = function (message, args, client,) {
                         message.author.avatarURL,
                         `**1 - ${opponent}\n2 - ${message.author}**\nУкажите цифру внизу`,
                         bot.colors.main, client
-                    )).then(() => {
+                    )).then(msgBot => {
                         function choosing () {
                             const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                             collector.on('collect', msg => {
@@ -214,14 +214,14 @@ module.exports.run = function (message, args, client,) {
             message.author.avatarURL,
             `**1 - ${message.author}\n2 - ${opponent}**\nУкажите цифру внизу`,
             bot.colors.main, client
-        )).then(() => {
+        )).then(msgBot => {
             function choosing () {
                 const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                 collector.on('collect', msg => {
                     collector.stop();
                     const num = parseInt(msg.content);
-                    if (num === 1) move(gameField, null, firstMove, 0, num, msg);
-                    else if (num === 2) move(gameField, null, firstMove, 0, num, true, msg);
+                    if (num === 1) move(gameField, null, firstMove, 0, num, msgBot);
+                    else if (num === 2) move(gameField, null, firstMove, 0, num, true, msgBot);
                     else {
                         return func.err('Вы должны указать либо `1`, либо `2`. Попробуйте еще раз', null, message);
                     }
