@@ -137,10 +137,10 @@ module.exports.run = function (message, args, client,) {
                         collector.on('collect', msg => {
                             collector.stop();
                             const number = parseInt(msg.content)
-                            if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end' || !message.content.startsWith(bot.prefix)) {
+                            if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                            } else if (msg.content.toLowerCase() === 'end' || message.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру')
+                            } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру')
                             
                             message.delete();
 
