@@ -132,7 +132,7 @@ module.exports.run = function (message, args, client,) {
                         message.author.avatarURL,
                         `И снова ничья?`,
                         bot.colors.yellow, client)});
-                    message.reply(`Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    message.reply(`Укажите номер поля внизу (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
                         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                         collector.on('collect', msg => {
                             collector.stop();
@@ -140,7 +140,9 @@ module.exports.run = function (message, args, client,) {
                             if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                            } else if (msg.content.toLowerCase() === 'end') return message.reply('Вы успешно остановили игру')
+                            } else if (msg.content.toLowerCase() === 'end' || message.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру')
+                            
+                            message.delete();
 
                             jimp.read(bot.images.ttt.circle, (err, circle) => {
                                 field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
@@ -149,6 +151,7 @@ module.exports.run = function (message, args, client,) {
                                     let newPosition = func.random(1, 9);
                                     numberOfMoves++;
                                     aiMovingFirst++;
+                                    msgBot.delete();
                                     if (currentField[newPosition - 1] && aiMovingFirst !== 6) {
                                         while (currentField[newPosition - 1]) newPosition = func.random(1, 9);
                                         return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst)
