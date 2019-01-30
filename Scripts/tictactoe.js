@@ -71,7 +71,7 @@ module.exports.run = function (message, args, client,) {
             if (img) field = img;
             jimp.read(link, (err, figure) => {
                 field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
-                    message.channel.send(`${playerMention}, твой ход. Укажите номер поля внизу (1-9)\nX - ${firstMention.username}\nO - ${secondMention.username}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => {
+                    message.channel.send(`${playerMention}, твой ход. Укажите номер поля внизу (1-9)\nX - ${firstMention.username}\nO - ${secondMention.username}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
                         const collector = new Discord.MessageCollector(message.channel, m => m.author.id === currentPlayer, { time: 60000 });
                         collector.on('collect', msg => {
                             collector.stop();
@@ -80,6 +80,9 @@ module.exports.run = function (message, args, client,) {
                                 func.err('Вы укзали неверное значение, либо клетка уже занята', null, message);
                                 return moveWithOpponent(currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);
                             } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру');
+                            
+                            msg.delete();
+
                             field.composite(figure, puttingImages(number)[0], puttingImages(number)[1]);
                             currentField[number - 1] = currentPlayer;
                             field.getBuffer(jimp.MIME_PNG, (error, buffer) => {
@@ -96,6 +99,8 @@ module.exports.run = function (message, args, client,) {
                                 if (currentPlayer === firstPlayer) currentPlayer = secondPlayer;
                                 else currentPlayer = firstPlayer;
                                 numberOfMoves++;
+                                
+                                msgBot.delete();
                                 return moveWithOpponent(currentField, field, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);  
                             })
                         });
