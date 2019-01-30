@@ -68,7 +68,7 @@ client.on('ready', () => {
         .addField(`Версия :floppy_disk:`, bot.version, true)
         .addField(`Авторизация :key:`, client.user.tag, true)
         .setColor('af00ff')));
-    }, 16000);
+    }, 6e4);
 });
 
 client.on('guildCreate', (guild) => {
