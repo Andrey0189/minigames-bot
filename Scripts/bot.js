@@ -1,10 +1,11 @@
 const Discord = require('discord.js');
 const hastebinGen = require('hastebin-gen');
 const client = new Discord.Client({disableEveryone: true});
-const bot = require('../Storage/constants.json');
+const bot = require('../Storage/constants.js');
 const func = require('./functions.js');
 const tictactoe = require('./tictactoe.js');
 const seabattle = require('./seabattle.js');
+const commands = require('../Storage/commands.js');
 //const chess = require('./chess');
 
 const prefix = '/';
@@ -24,7 +25,7 @@ Discord.Message.prototype.multipleReact = async function (arr) {
     }
 }
 
-const addCommas = (int) => `\`${int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}\``;
+const addCommas = (int) => int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Discord.Collection(), lastMessage) {
     let obj = {limit: 99};
@@ -49,7 +50,7 @@ client.on('ready', () => {
     setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 120000)
     setInterval(() => commandsPerHour = 0, 3600000);
 
-    setInterval(() => {
+    /*setInterval(() => {
         client.channels.get('539737874032230437').fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
         .setTitle(`Бот "${bot.name}"`)
         .setThumbnail(client.user.avatarURL)
@@ -67,8 +68,8 @@ client.on('ready', () => {
         .addField(`Включен :on:`, client.readyAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}), true)
         .addField(`Версия :floppy_disk:`, bot.version, true)
         .addField(`Авторизация :key:`, client.user.tag, true)
-        .setColor('af00ff')));
-    }, 6e4);
+        .setColor(bot.colors.main)));
+    }, 16000);*/
 });
 
 client.on('guildCreate', (guild) => {
@@ -119,6 +120,8 @@ client.on('message', message => {
         message.author.tag, message.author.avatarURL,
         `**${message.author.tag}** использовал команду **${bot.prefix}${command}** ${(args[0]? `\`${args.join(' ')}\`` : '')} на сервере **${message.guild.name}**`, bot.colors.green, client
     ), client);
+
+
  
     if (['rsp', 'кнб'].includes(command)) {
         let choice = args[0];
@@ -250,16 +253,6 @@ client.on('message', message => {
         func.send(bugsAndIdeas, `Идея от ${message.author} (${message.author.tag}):\n**${idea}**`, client);
     }
 
-    if (command === 'creator') message.channel.send(`\`${client.users.get(bot.creatorID).tag}\``);
-    if (command === 'invite') message.channel.send(`Пригласить бота:\nhttps://discordapp.com/oauth2/authorize?client_id=522731595858313217&scope=bot&permissions=379904`);
-
-    if (command === 'mass-say' && message.author.id === bot.creatorID) {
-        client.guilds.forEach(guild => {
-            let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
-            if (channels.size > 0) channels.first().send(args.join(' '));
-        })
-    }
-
     if (['roll', 'dice', 'rand', 'random'].includes(command)) {
         let num1 = parseInt(args[0]) || 1;
         let num2 = parseInt(args[1]) || 6;
@@ -290,6 +283,70 @@ client.on('message', message => {
             bot.colors.main, client
         ));
     }
+            
+    if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
+    //if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
+    //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
+
+    if (['donate', 'донат', 'пожертвование'].includes(command)) {
+        const embed = new Discord.RichEmbed()
+        .addField(':moneybag: Информация о донате', '**Если вам нравится данный бот, то вы можете поддержать автора, чтобы бот стал еще лучше! А вы получите __кучу плюшек__ на официальном сервере! :point_right: https://discord.gg/NvcAKdt**')
+        .addField('Способы оплаты', '**Пока что, есть только Qiwi ¯\\_(ツ)_/¯ https://qiwi.me/andreybots**')
+        .setColor(bot.colors.main);
+        message.channel.send(embed);
+    }
+
+    if (['info', 'information', 'ифна', 'информация'].includes(command)) {
+        const embed = new Discord.RichEmbed()
+        .setAuthor('Инофрмация о боте', message.author.avatarURL)
+        .addField('Базовая информация', `**Servers: \`${client.guilds.size}\`\nChannels: \`${client.channels.size}\`\nUsers: \`${client.users.size}\`\nRAM: \`${addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/1,024 MB\`**`)
+        .addField('Наша команда', `**\`${client.users.get(bot.creatorID).tag}\` - Главный разработчик и дизайнер\n\`client.users.get(bot.zzigerID).tag\` - Помощник в написании кода\n\`client.users.get(bot.artemCordId).tag\` - Автор аватарки**`)
+        .setTitle('Пригласить бота')
+        .setURL(`https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=379904`)
+        .setColor(bot.colors.main)
+        message.channel.send(embed)
+    }
+
+    if (command === 'help') {
+        let arr = [];
+        const page = parseInt(args[0]) || 1;
+        const cmdsCount = 5;
+        const embed = new Discord.RichEmbed()
+        .setColor(bot.colors.main)
+        .setAuthor('Помощь', message.author.avatarURL || message.author.defaultAvatarURL)
+        //.setFooter(`Страница ${page}/${Math.ceil(Object.keys(commands).length / cmdsCount)} | Для перехода на следующую страницу напишите ${bot.prefix}help ${page + 1}`);
+        const desc = `**Для лучшего понимания работы бота советуем прочитать данный текст:\n
+\`<...>\` - Обязательный параметр
+\`[...]\` - Необязательный параметр
+\`&\` - Оператор И
+\`|\` - Оператор ИЛИ
+\`n\` - Число\n
+ВНИМАНИЕ! не включайте скобки, а также знаки \`|\` и \`&\` в написание команды, они изображены здесь только для того, чтобы использование команды понималось легче. Если вам все таки не понятно, как пользоваться той или иной командой, то напишите ${bot.prefix}cmd-help **\`<Название команды>\`\n\n`;
+
+        for (let i in commands) {
+            arr.push(`:white_medium_small_square: **${bot.prefix}${commands[i].name}`);
+            for (let a in commands[i].args) if (commands[i].args) arr[arr.length - 1] += ` \`${commands[i].args[a]}\` `
+            arr[arr.length - 1] += `** - ${commands[i].desc}`;
+        }
+
+        let content = arr/*.slice(1 + ((page - 1) * cmdsCount), (cmdsCount + 1) + ((page - 1) * cmdsCount))*/.join('\n');
+        content += `\n\n**:moneybag: Нравится бот? Поддержите автора донатом и получите кучу плюшек на официальном сервере! https://qiwi.me/andreybots\n:link: Ссылка на официальный сервер бота, где можно получить больше помощи: https://discord.gg/NvcAKdt**`
+        embed.setDescription(desc + content);
+        message.channel.send(embed)
+    };
+
+    if (command === 'cmd-help') {
+        if (['help', 'cmd-help'].includes(args[0])) return func.err('Ты ебобо?', null, message)
+        let cmd
+        for (let i in commands) if (commands[i].aliases.includes(args[0])) cmd = commands[i]
+        if (!cmd) return func.err('Вы не указали команду', null, message);
+
+        const embed = new Discord.RichEmbed()
+        if (cmd.detailedDesc) embed.addField(`Информация о команде ${bot.prefix}${cmd.name}`, `**${cmd.detailedDesc}**`)
+        embed.addField('Сокращения', `\`${bot.prefix}${cmd.aliases.join(`, ${bot.prefix}`)}\``)
+        .setColor(bot.colors.main);
+        message.channel.send(embed);
+    }
 
     if (command === 'eval') {
 
@@ -304,44 +361,15 @@ client.on('message', message => {
         } catch (error) { message.author.send(`Анхэндлэд промайз риджекшн ворнинг \`\`\`js\n${error}\`\`\``).then(() => message.react("❎")) }; //Отправка ошибки
         
     }
-            
-    if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
-    //if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
-    //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
 
-    if (command === 'help') {
-        message.channel.send(func.embed(
-            'Помощь',
-            message.author.avatarURL,
-            `
-\`<...>\` - Обязательный параметр
-\`[...]\` - Необязательный параметр
-\`&\` - Оператор И
-\`|\` - Оператор ИЛИ
-\`n\` - Число\n
-**Миниигры:**
-**${prefix}rsp** \`<камень | ножницы | бумага>\` - Камень, ножницы, бумага
-**${prefix}countries** \`[easy | medium | hard | impossible]\` - Угадай флаг страны
-**${prefix}capitals** \`[easy | medium | hard | impossible]\` - Угадай столицу страны
-**${prefix}ttt** \`[пользователь]\` - Крестики-нолики
-**${prefix}rand** \`[n & n]\` - Генератор случайных чисел\n
-**Другие команды:**
-**${prefix}bug** \`<описание бага>\` - Если бот работает не так как должен, то вы можете написать об этом разработчику с помощью этой команды
-**${prefix}idea** \`<идея>\` - Отправить идею о новой миниигре разработчику
-**${prefix}invite** - Ссылка на приглашение бота
-**${prefix}creator** - Узнать создателя бота
-**${prefix}update** \`[n.n.n]\` - Узнать что было добавлено в новом обновлении\n
-**:moneybag: Нравится бот? Поддержите автора донатом и получите кучу плюшек на официальном сервере!** https://qiwi.me/andreybots
-**Получить больше помощи можно тут:** https://discord.gg/NvcAKdt
-`,
+    if (command === 'mass-say' && message.author.id !== bot.creatorID) {
+        client.guilds.forEach(guild => {
+            let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
+            if (channels.size > 0) channels.first().send(args.join(' '));
+        })
+    }
 
-            bot.colors.main, client
-        ));
-    };
-
-    if (message.author.id !== bot.creatorID) return;
-
-    if (command === 'guilds') {
+    if (command === 'guilds' && message.author.id !== bot.creatorID) {
         const guildsCollection = client.guilds.sort((guild1, guild2) => { return guild2.memberCount-guild1.memberCount });
         let guilds = [];
         guildsCollection.forEach(guild => {
