@@ -300,7 +300,7 @@ client.on('message', message => {
         const embed = new Discord.RichEmbed()
         .setAuthor('Инофрмация о боте', message.author.avatarURL)
         .addField('Базовая информация', `**Servers: \`${client.guilds.size}\`\nChannels: \`${client.channels.size}\`\nUsers: \`${client.users.size}\`\nRAM: \`${addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/1,024 MB\`**`)
-        .addField('Наша команда', `**\`${client.users.get(bot.creatorID)} ${client.users.get(bot.creatorID).tag}\` - Главный разработчик и дизайнер\n\`${client.users.get(bot.zzigerID)} ${client.users.get(bot.zzigerID).tag}\` - Помощник в написании кода\n\`${client.users.get(bot.artemCordId)} ${client.users.get(bot.artemCordId).tag}\` - Автор аватарки**`)
+        .addField('Наша команда', `**${client.users.get(bot.creatorID)} \`${client.users.get(bot.creatorID).tag}\` - Главный разработчик и дизайнер\n${client.users.get(bot.zzigerID)} \`${client.users.get(bot.zzigerID).tag}\` - Помощник в написании кода\n${client.users.get(bot.artemCordId)} \`${client.users.get(bot.artemCordId).tag}\` - Автор аватарки**`)
         .setTitle('Пригласить бота')
         .setURL(`https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=379904`)
         .setColor(bot.colors.main)
