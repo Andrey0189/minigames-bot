@@ -362,14 +362,14 @@ client.on('message', message => {
         
     }
 
-    if (command === 'mass-say' && message.author.id !== bot.creatorID) {
+    if (command === 'mass-say' && message.author.id === bot.creatorID) {
         client.guilds.forEach(guild => {
             let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
             if (channels.size > 0) channels.first().send(args.join(' '));
         })
     }
 
-    if (command === 'guilds' && message.author.id !== bot.creatorID) {
+    if (command === 'guilds' && message.author.id === bot.creatorID) {
         const guildsCollection = client.guilds.sort((guild1, guild2) => { return guild2.memberCount-guild1.memberCount });
         let guilds = [];
         guildsCollection.forEach(guild => {
