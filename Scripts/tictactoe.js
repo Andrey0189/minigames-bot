@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const bot = require('../Storage/constants.json');
+const bot = require('../Storage/constants.js');
 const func = require('./functions.js');
 const jimp = require('jimp');
 
@@ -99,7 +99,7 @@ module.exports.run = function (message, args, client,) {
                                 if (currentPlayer === firstPlayer) currentPlayer = secondPlayer;
                                 else currentPlayer = firstPlayer;
                                 numberOfMoves++;
-                                
+
                                 msgBot.delete();
                                 return moveWithOpponent(currentField, field, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);  
                             })
