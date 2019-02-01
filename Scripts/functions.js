@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const bot = require('../Storage/constants.json');
+const bot = require('../Storage/constants.js');
 
 /*module.exports.command = function (name, perms, correctArgs, message, command) {
     if (!name.includes(command)) return;
