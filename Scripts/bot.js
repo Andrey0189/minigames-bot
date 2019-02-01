@@ -50,7 +50,7 @@ client.on('ready', () => {
     setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 120000)
     setInterval(() => commandsPerHour = 0, 3600000);
 
-    /*setInterval(() => {
+    setInterval(() => {
         client.channels.get('539737874032230437').fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
         .setTitle(`Бот "${bot.name}"`)
         .setThumbnail(client.user.avatarURL)
@@ -69,7 +69,7 @@ client.on('ready', () => {
         .addField(`Версия :floppy_disk:`, bot.version, true)
         .addField(`Авторизация :key:`, client.user.tag, true)
         .setColor(bot.colors.main)));
-    }, 16000);*/
+    }, 16000);
 });
 
 client.on('guildCreate', (guild) => {
@@ -300,7 +300,7 @@ client.on('message', message => {
         const embed = new Discord.RichEmbed()
         .setAuthor('Инофрмация о боте', message.author.avatarURL)
         .addField('Базовая информация', `**Servers: \`${client.guilds.size}\`\nChannels: \`${client.channels.size}\`\nUsers: \`${client.users.size}\`\nRAM: \`${addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/1,024 MB\`**`)
-        .addField('Наша команда', `**\`${client.users.get(bot.creatorID).tag}\` - Главный разработчик и дизайнер\n\`client.users.get(bot.zzigerID).tag\` - Помощник в написании кода\n\`client.users.get(bot.artemCordId).tag\` - Автор аватарки**`)
+        .addField('Наша команда', `**\`${client.users.get(bot.creatorID).tag}\` - Главный разработчик и дизайнер\n\`${client.users.get(bot.zzigerID).tag}\` - Помощник в написании кода\n\`${client.users.get(bot.artemCordId).tag}\` - Автор аватарки**`)
         .setTitle('Пригласить бота')
         .setURL(`https://discordapp.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=379904`)
         .setColor(bot.colors.main)
