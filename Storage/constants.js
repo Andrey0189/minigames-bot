@@ -6,9 +6,9 @@ module.exports = {
     artemCordId: '447019894735634432',
     prefix : '/',
     channels: {
-        serverLeaveJoin: '518702056031125505',
-        commandsUsing: '518702056031125505',
-        bugsIdeas: '518702056031125505',
+        serverLeaveJoin: '536187820243550228',
+        commandsUsing: '536187872655704074',
+        bugsIdeas: '536187892968587285',
         stats: '539737874032230437',
     },
     updates : {
