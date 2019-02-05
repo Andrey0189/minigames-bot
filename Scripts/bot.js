@@ -1,10 +1,17 @@
+/*
+* Никто не запрещает брать Вам брать или читать куски этого кода для обучения
+* Но не желательно его форкать, чтобы сделать копию бота или для подобных причин
+* Если Вы хотите поддержать разработку, то можете зайти на наш дискорд сервер https://discord.gg/NvcAKdt или кинуть денежку https://qiwi.me/andreybots
+*/
+
 const Discord = require('discord.js');
 const hastebinGen = require('hastebin-gen');
+const jimp = require('jimp');
 const client = new Discord.Client({disableEveryone: true});
 const bot = require('../Storage/constants.js');
 const func = require('./functions.js');
 const tictactoe = require('./tictactoe.js');
-const seabattle = require('./seabattle.js');
+//const seabattle = require('./seabattle.js');
 const commands = require('../Storage/commands.js');
 //const chess = require('./chess');
 
@@ -46,12 +53,12 @@ Discord.TextChannel.prototype.betterFetch = async function (int, arr = new Disco
 /** @namespace process.env.BOT_TOKEN */
 
 client.on('ready', () => {
-    console.log(`Бот запущен.\nСервера: ${client.guilds.size}\nЮзеры: ${client.users.size}\nКаналы: ${client.channels.size}`);
-    setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 120000)
-    setInterval(() => commandsPerHour = 0, 3600000);
+    console.log(`${client.user.tag} запущен.\nСервера: ${client.guilds.size}\nЮзеры: ${client.users.size}\nКаналы: ${client.channels.size}`);
+    setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 12e4)
+    setInterval(() => commandsPerHour = 0, 36e5);
 
-    setInterval(() => {
-        client.channels.get('539737874032230437').fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
+    if (false) setInterval(() => {
+        client.channels.get(bot.channels.stats).fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
         .setTitle(`Бот "${bot.name}"`)
         .setThumbnail(client.user.avatarURL)
         .addField(`Пинг :ping_pong:`, `${addCommas(Math.round(client.ping))} ms`, true)
@@ -69,7 +76,7 @@ client.on('ready', () => {
         .addField(`Версия :floppy_disk:`, bot.version, true)
         .addField(`Авторизация :key:`, client.user.tag, true)
         .setColor(bot.colors.main)));
-    }, 16000);
+    }, 6e4);
 });
 
 client.on('guildCreate', (guild) => {
@@ -83,14 +90,14 @@ Created at: \`${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Mosco
     .setColor(bot.colors.green)
     .setThumbnail(guild.iconURL)
     .setFooter(`This is our ${client.guilds.size} server`)
-    func.send(serverLeaveJoin, embed, client);
+    func.send(bot.channels.serverLeaveJoin, embed, client);
     let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
     if (channels.size > 0) channels.first().send(`Спасибо за приглашение меня на сервер, чтобы узнать как мной пользоваься и какие миниигры у меня есть, то напишите ${prefix}help. Больше помощи можно получить тут --> https://discord.gg/DxptT7N`);
 });
 
 client.on('guildDelete', (guild) => {
     const embed = new Discord.RichEmbed()
-    .addField(':outbox_tray: OH NO WE LEFT THE SERVER!!!', `
+    .addField(':outbox_tray: OH NO WE LOST THE SERVER!!!', `
 Name: \`${guild.name}\`
 ID: \`${guild.id}\`
 Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
@@ -100,30 +107,52 @@ Created at: \`${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Mosco
     .setThumbnail(guild.iconURL)
     .setFooter(`Bye bye...`)
 
-    func.send(serverLeaveJoin, embed, client);
+    func.send(bot.channels.serverLeaveJoin, embed, client);
 });
 
 client.on('message', message => {
-    if(message.channel.type !== `text` || message.author.bot) return;
-
+    if (!message.guild || message.author.bot) return;
     msgs++;
 
     if (!message.content.startsWith(bot.prefix)) return;
 
-    commandsPerHour++;
-    usedCommands++;
-
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
+    const authorAvatar = message.author.avatarURL || message.author.defaultAvatarURL;
 
-    if (message.author.id !== bot.creatorID) func.send(commandsUsing, func.embed(
-        message.author.tag, message.author.avatarURL,
-        `**${message.author.tag}** использовал команду **${bot.prefix}${command}** ${(args[0]? `\`${args.join(' ')}\`` : '')} на сервере **${message.guild.name}**`, bot.colors.green, client
-    ), client);
-
-
+    for (let i in commands) if (commands[i].aliases.includes(command)) {
+        commandsPerHour++;
+        usedCommands++;
+        
+        if (!commands[i].used) commands[i].used = 0;
+        commands[i].used++;
+        jimp.read(authorAvatar).then(avatar => {
+            avatar.resize(50, 50)
+            jimp.read(bot.images.circle).then(mask => {
+                avatar.mask(mask, 0, 0)
+                jimp.read(bot.images.bg).then(bg => {
+                    bg.composite(avatar, 10, 15);
+                    jimp.loadFont(jimp.FONT_SANS_16_WHITE).then(font => {
+                        bg.print(font, 80, 20, message.author.username);
+                        let user;
+                        if (args.join(' ').match(/<!?@(\d+)?>/)) user = `@${client.users.get(args.join(' ').match(/<!?@(\d+)?>/)[1]).tag}`
+                        bg.print(font, 80, 43, message.content.replace(/<!?@(\d+)?>/, user))
+                        bg.getBuffer(jimp.MIME_PNG, (err, buffer) => {
+                            const screenshot = new Discord.Attachment(buffer, 'screenshot.png');
+                            const embed = new Discord.RichEmbed()
+                            .setAuthor(message.author.tag, authorAvatar)
+                            .setDescription(`\`${message.author.tag}\` использовал команду **${bot.prefix}${command}** ${(args[0]? `\`${args.join(' ').replace(/<!?@(\d+)?>/, user)}\`` : '')} на сервере \`${message.guild.name}\``)
+                            .attachFile(screenshot)
+                            .setColor(bot.colors.green);
+                            func.send(bot.channels.commandsUsing, embed, client);
+                        })
+                    })
+                })
+            })
+        })
+    }
  
-    if (['rsp', 'кнб'].includes(command)) {
+    if (commands.rsp.aliases.includes(command)) {
         let choice = args[0];
 
         if (['r', 'rock', 'камень', 'к'].includes(choice)) choice = client.emojis.get(bot.emojis.rock)
@@ -167,7 +196,7 @@ client.on('message', message => {
         else message.channel.send(func.embed('Ничья!', message.author.avatarURL, `**Оба выбрали** ${choice}`, bot.colors.yellow, client));
     }
 
-    if (['countries', 'страны', 'capitals', 'столицы'].includes(command)) {
+    if (commands.countries.aliases.includes(command) || commands.capitals.aliases.includes(command)) {
         const countriesCmd = ['countries', 'страны'];
         const capitalsCmd = ['capitals', 'столицы'];
 
@@ -239,21 +268,25 @@ client.on('message', message => {
         });
     }
 
-    if (command === 'bug') {
-        if (!args[0]) return func.err('Не указан баг', null, message)
+    if (commands.bug.aliases.includes(command) || commands.idea.aliases.includes(command)) {
+        let err = 'Не указан баг';
+        if (commands.idea.aliases.includes(command)) err = 'Не указана идея'
+
+        const id = func.random(1e4, 1e5);
+
+        if (!args[0]) return func.err(err, null, message)
         const bug = args.join(' ');
-        message.channel.send('Баг успешно отправлен');
-        func.send(bugsAndIdeas, `Баг от ${message.author} (${message.author.tag}):\n**${bug}**`, client);
+
+        const embed = new Discord.RichEmbed()
+        .setAuthor('Отправлено', authorAvatar)
+        .setColor(bot.colors.main)
+        .setDescription(`Репорт успешно отправлен. Его ID \`${id}\`, запомните его!`);
+        message.channel.send(embed);
+
+        func.send(bot.channels.bugsIdeas, `Репорт от ${message.author} \`${message.author.tag}\` (Report ID: \`${id}\`):\n**${bug}**`, client);
     }
 
-    if (command === 'idea') {
-        if (!args[0]) return func.err('Не указана идея', null, message)
-        const idea = args.join(' ');
-        message.channel.send('Идея успешно отправлена');
-        func.send(bugsAndIdeas, `Идея от ${message.author} (${message.author.tag}):\n**${idea}**`, client);
-    }
-
-    if (['roll', 'dice', 'rand', 'random'].includes(command)) {
+    if (commands.rand.aliases.includes(command)) {
         let num1 = parseInt(args[0]) || 1;
         let num2 = parseInt(args[1]) || 6;
 
@@ -273,7 +306,7 @@ client.on('message', message => {
         ));
     };
 
-    if (command === 'update') {
+    if (commands.update.aliases.includes(command)) {
         const update = args[0] || bot.version;
         if (!bot.updatesList.includes(update)) return func.err(`Вы неправильно указали номер обновления. Существующие версии:\b${bot.updatesList.join(', ')}`, null, message);
         message.channel.send(func.embed(
@@ -284,11 +317,11 @@ client.on('message', message => {
         ));
     }
             
-    if (['ttt', 'tic-tac-toe', 'крестики-нолики'].includes(command)) tictactoe.run(message, args, client);
+    if (commands.ttt.aliases.includes(command)) tictactoe.run(message, args, client);
     //if (['seabattle', 'sb'].includes(command)) seabattle.run(message, args, client);
     //if (['ch', 'chess'].includes(command) && message.author.id === bot.creatorID) chess.run(client, message, args);
 
-    if (['donate', 'донат', 'пожертвование'].includes(command)) {
+    if (commands.donate.aliases.includes(command)) {
         const embed = new Discord.RichEmbed()
         .addField(':moneybag: Информация о донате', '**Если вам нравится данный бот, то вы можете поддержать автора, чтобы бот стал еще лучше! А вы получите __кучу плюшек__ на официальном сервере! :point_right: https://discord.gg/NvcAKdt**')
         .addField('Способы оплаты', '**Пока что, есть только Qiwi ¯\\_(ツ)_/¯ https://qiwi.me/andreybots**')
@@ -296,7 +329,7 @@ client.on('message', message => {
         message.channel.send(embed);
     }
 
-    if (['info', 'information', 'ифна', 'информация'].includes(command)) {
+    if (commands.info.aliases.includes(command)) {
         const embed = new Discord.RichEmbed()
         .setAuthor('Инофрмация о боте', message.author.avatarURL)
         .addField('Базовая информация', `**Servers: \`${addCommas(client.guilds.size)}\`\nChannels: \`${addCommas(client.channels.size)}\`\nUsers: \`${addCommas(client.users.size)}\`\nRAM: \`${addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/1,024 MB\`**`)
@@ -307,7 +340,21 @@ client.on('message', message => {
         message.channel.send(embed)
     }
 
-    if (command === 'help') {
+    if (commands.used.aliases.includes(command)) {
+        let arr = [];
+        for (let i in commands) if (commands[i].used) arr.push(commands[i]);
+        if (arr.length < 1) return message.reply('Кажется, никто еще не использовал команды ¯\\_(ツ)_/¯. Поздравляем, Вы стали первым')
+        arr.sort((cmd1, cmd2) => {return cmd2.used - cmd1.used});
+        for (let i in arr) arr[i] = (`${bot.prefix}${arr[i].name} - \`${addCommas(arr[i].used)}\``);
+
+        const embed = new Discord.RichEmbed()
+        .setAuthor('Отчет о командах', authorAvatar)
+        .setDescription(arr.join('\n'))
+        .setColor(bot.colors.main);
+        message.channel.send(embed);
+    }
+ 
+    if (commands.help.aliases.includes(command)) {
         let arr = [];
         const page = parseInt(args[0]) || 1;
         const cmdsCount = 5;
@@ -324,6 +371,7 @@ client.on('message', message => {
 ВНИМАНИЕ! не включайте скобки, а также знаки \`|\` и \`&\` в написание команды, они изображены здесь только для того, чтобы использование команды понималось легче. Если вам все таки не понятно, как пользоваться той или иной командой, то напишите ${bot.prefix}cmd-help **\`<Название команды>\`\n\n`;
 
         for (let i in commands) {
+            if (commands[i].disableHelp) continue;
             arr.push(`:white_medium_small_square: **${bot.prefix}${commands[i].name}`);
             for (let a in commands[i].args) if (commands[i].args) arr[arr.length - 1] += ` \`${commands[i].args[a]}\` `
             arr[arr.length - 1] += `** - ${commands[i].desc}`;
@@ -335,7 +383,7 @@ client.on('message', message => {
         message.channel.send(embed)
     };
 
-    if (command === 'cmd-help') {
+    if (commands.cmd_help.aliases.includes(command)) {
         if (['help', 'cmd-help'].includes(args[0])) return func.err('Ты ебобо?', null, message)
         let cmd
         for (let i in commands) if (commands[i].aliases.includes(args[0])) cmd = commands[i]
@@ -351,7 +399,7 @@ client.on('message', message => {
     if (command === 'eval') {
 
         if (![bot.creatorID, '391592337685610496', '426338672342990850'].includes(message.author.id)) return func.err('Эта команда недоступна обычным пользователям', null, message);
-        const code = args.join(" "); //Константа с ботом
+        const code = args.join(" "); //Константа с кодом
 
         try {
             let output = eval(code); //Константа с эмуляцией кода
@@ -360,6 +408,17 @@ client.on('message', message => {
             else message.author.send(`${output}`, {split:"\n", code:"js"}); //Отправка результатов симуляции если их длина больше 1950-ти
         } catch (error) { message.author.send(`Анхэндлэд промайз риджекшн ворнинг \`\`\`js\n${error}\`\`\``).then(() => message.react("❎")) }; //Отправка ошибки
         
+    }
+
+    if (command === 'report-answer' && message.author.id === bot.creatorID) {
+        try {
+            const id = args[0];
+            const user = client.users.get(args[1]);
+            const answer = args.slice(2).join(' ');
+            user.send(`**Ваш ответ на репорт под ID \`${id}\`**:\n${answer}`)
+        } catch (err) {
+            message.channel.send(`//Сарян, ащипка))0)\n${err}`, {code: 'js'});
+        }
     }
 
     if (command === 'mass-say' && message.author.id === bot.creatorID) {
@@ -374,14 +433,12 @@ client.on('message', message => {
         let guilds = [];
         guildsCollection.forEach(guild => {
             guilds.push(`
-            Это ${guild.name}. Информация о серере:
-                Основатель: ${guild.owner.user.tag} (${guild.ownerID})
-                Акроним и ID: ${guild.nameAcronym} | ${guild.id}
-                Пользователи: ${guild.memberCount}
-                Каналы: ${guild.channels.size}
-                Роли: ${guild.roles.size}
-                Создана: ${guild.createdAt.toString().slice(4, -33)}
-                Иконка: ${guild.iconURL}
+            Server Inforamtion:
+                Name: ${guild.name}
+                ID: ${guild.id}
+                Objects count: m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}
+                Owner: ${guild.owner.user.id} ${guild.owner.user.tag}
+                Created at: ${guild.createdAt.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\//g, '-')}
             `)
         })
         try { hastebinGen(guilds.join('\n========================================================\n\n'), 'txt').then(link => message.channel.send(`Мои севрера --> ${link}`)) }

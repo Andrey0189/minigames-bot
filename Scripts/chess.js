@@ -1,5 +1,7 @@
+//Внимание! Шахматы еще не доделаны
+
 const Discord = require('discord.js');
-const bot = require('../Storage/constants.json');
+const bot = require('../Storage/constants.js');
 const func = require('./functions.js');
 const jimp = require('jimp');
 
