@@ -57,7 +57,7 @@ client.on('ready', () => {
     setInterval(() => client.user.setActivity(`${prefix}help | ${client.guilds.size} servers`, {type : "PLAYING"}), 12e4)
     setInterval(() => commandsPerHour = 0, 36e5);
 
-    if (false) setInterval(() => {
+    setInterval(() => {
         client.channels.get(bot.channels.stats).fetchMessage('539749513246670861').then(msg => msg.edit(new Discord.RichEmbed()
         .setTitle(`Бот "${bot.name}"`)
         .setThumbnail(client.user.avatarURL)
