@@ -91,7 +91,7 @@ class Bot {
             const command = args.shift().toLowerCase();
 
             const cmd = _this.commands.find(c => command.match(new RegExp(c.regex)));
-            if (cmd) cmd.run(message, args, command);
+            if ((!cmd.private || message.author.id === _this.creatorID) && cmd) cmd.run(message, args, command);
 
             if (command === 'help') {
                 const page = parseInt(args[0]) || 1;
