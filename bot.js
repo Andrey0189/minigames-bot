@@ -73,8 +73,8 @@ class Bot {
                         args: cmd.info.args,
                         desc: cmd.info.desc,
                         run: cmd.run,
-                        private: cmd.info.private,
-                        hidden: cmd.info.hidden
+                        private: cmd.info.private || false,
+                        hidden: cmd.info.hidden || false,
                     });
                 })
             })
