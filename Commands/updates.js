@@ -2,7 +2,8 @@ module.exports.info = {
     name: 'update',
     regex: /updates?-?(info)?|versions?-?(info)?/,
     args: '[n.n.n]',
-    example: '0.3.2'
+    example: '0.3.2',
+    desc: 'Changelog'
 };
 
 module.exports.run = (message, args) => {
