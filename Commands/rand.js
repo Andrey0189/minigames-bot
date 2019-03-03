@@ -1,7 +1,8 @@
 module.exports.info = {
     name: 'random',
     desc: 'Random number generator',
-    regex: /rand(om)?/
+    regex: /rand(om)?/,
+    args: '[n & n]'
 };
 
 module.exports.run = (message, args) => {
