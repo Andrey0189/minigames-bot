@@ -1,7 +1,8 @@
 module.exports.info = {
     name: 'bug',
     regex: /bug-?(report)?|ба[гк]-?(репорт)?/,
-    args: '[bug desc]'
+    args: '[bug desc]',
+    desc: 'Send bug-report to developer'
 };
 
 module.exports.run = (message, args) => {
