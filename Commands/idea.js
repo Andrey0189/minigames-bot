@@ -2,7 +2,8 @@ module.exports.info = {
     name: 'idea',
     regex: /idea-?(report)?|идея-?(репорт)?/,
     args: '[idea desc]',
-    example: 'Chess'
+    example: 'Chess',
+    desc: 'Send idea-report to the developer'
 };
 
 module.exports.run = (message, args) => {
