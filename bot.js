@@ -96,7 +96,7 @@ class Bot {
             if (command === 'help') {
                 const page = parseInt(args[0]) || 1;
                 const helpCommands = _this.commands.filter(c => !c.private && !c.hidden)
-                const arr = helpCommands.map(cmd => `◽ **${cmd.name} \`${cmd.args}\` -** ${cmd.desc}`);
+                const arr = helpCommands.map(cmd => `◽ **${cmd.name} ${cmd.args?`\`${cmd.args}\``:''} -** ${cmd.desc}`);
                 const embed = new Discord.RichEmbed()
                 .setAuthor('Help', message.author.avatarURL)
                 .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
