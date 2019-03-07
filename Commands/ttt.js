@@ -2,7 +2,6 @@ module.exports.info = {
     name: 'ttt',
     regex: /t(ic)?-?t(ac)?-?t(oe)?-?|к(рестики)?-?н(олики)?/,
     desc: 'Tic Tac Toe',
-    args: '[user]'
 };
 
 module.exports.run = (message, args) => {
