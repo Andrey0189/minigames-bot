@@ -28,7 +28,7 @@ class Bot {
         //Объект с командами
         this.commands = [];
         //
-        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#8389');
+        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#2623');
         //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
