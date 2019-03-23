@@ -186,7 +186,7 @@ module.exports.run = (message, args) => {
       if (opponent.user.presence.status === 'offline') return Bot.err(message, `${opponent} is offline`);
       if (opponent.id === message.author.id) return Bot.err(message, 'Oh, you don\'t have friends :(');
       message.channel.send(`${opponent}, Do you want to play "Tic-Tac-Toe" with ${message.author}? Yes/no`).then(() => {
-          const collector = new Discord.MessageCollector(message.channel, m => m.author.id === opponent.id, { time: 60000 });
+          const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === opponent.id, { time: 60000 });
           collector.on('collect', msg => {
               collector.stop();
               if (!['+', 'да', 'yes'].includes(msg.content.toLowerCase())) return message.reply(`Sorry, but ${opponent} doesn\'t want to play with you`);
