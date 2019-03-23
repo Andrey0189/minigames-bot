@@ -128,7 +128,7 @@ class Bot {
         * Costants
         */
 
-        this.serverLink = 'https://discord.gg/NvcAKdt';
+        this.serverLink = 'https://discord.gg/bM6eVMt';
 
         this.colors = {
             discord: '36393F',
