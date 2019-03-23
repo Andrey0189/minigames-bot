@@ -117,10 +117,24 @@ class Bot {
         Created at: \`${_this.toMoscowTime(guild.createdAt)}\``)
             .setColor(_this.colors.green)
             .setThumbnail(guild.iconURL)
-            .setFooter(`This is our ${client.guilds.size} server`)
+            .setFooter(`Now we have ${_this.client.guilds.size} servers`)
             Bot.sendIn(Bot.channels.serverLeaveJoin, embed);
             let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
             if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! https://discord.gg/DxptT7N`);
+        });
+        
+        this.client.on('guildDelete', (guild) => {
+            const embed = new Discord.RichEmbed()
+            .addField(':outbox_tray: Server was removed', `
+        Name: \`${guild.name}\`
+        ID: \`${guild.id}\`
+        Objects count: \`m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\`
+        Owner: ${guild.owner.user} \`${guild.owner.user.tag}\`
+        Created at: \`${_this.toMoscowTime(guild.createdAt)}\``)
+            .setColor(_this.colors.red)
+            .setThumbnail(guild.iconURL)
+            .setFooter(`Now we have ${_this.client.guilds.size} servers`)
+            Bot.sendIn(Bot.channels.serverLeaveJoin, embed);
         });
 
 
