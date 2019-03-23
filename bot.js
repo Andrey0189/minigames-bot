@@ -53,7 +53,7 @@ class Bot {
         this.random = (min, max) => Math.floor(Math.random() * (max + 1 - min)) + min;
 
         //Функция, отправляющая сообщение в указанный канал
-        this.sendIn = (id, msg) => this.client.channels.get(id).send(msg);
+        this.sendIn = (id, msg) => _this.client.channels.get(id).send(msg);
 
         this.addCommas = (int) => int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
@@ -210,10 +210,10 @@ class Bot {
         this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0'];
 
         this.channels = {
-            serverLeaveJoin: '536187820243550228',
-            commandsUsing: '536187872655704074',
-            reports: '536187892968587285',
-            stats: '539737874032230437',
+            serverLeaveJoin: '558547058286526464',
+            commandsUsing: '558547076691263489',
+            reports: '558547100799860746',
+            stats: '558548048175955979',
         };
 
         this.versions = {
