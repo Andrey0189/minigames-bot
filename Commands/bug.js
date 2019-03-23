@@ -14,5 +14,5 @@ module.exports.run = (message, args) => {
     .setDescription(`**Your report ID is \`${id}\`. Remember it!**`)
     .setColor(Bot.colors.main);
     message.channel.send(embed)
-    Bot.sendIn(Bot.channels.reports, `**Bug Report \`${id}\` from ${message.author} \`[${message.author.tag}]\`:${bug}**`)
+    Bot.sendIn(Bot.channels.reports, `**Bug Report \`${id}\` from ${message.author} \`[${message.author.tag}]\`:\n${bug}**`)
 }
