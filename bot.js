@@ -119,7 +119,7 @@ class Bot {
             .setThumbnail(guild.iconURL)
             .setFooter(`Now we have ${_this.client.guilds.size} servers`)
             _this.sendIn(_this.channels.serverLeaveJoin, embed);
-            let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.members.get(client.user.id)).has('SEND_MESSAGES'));
+            let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
             if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! https://discord.gg/DxptT7N`);
         });
         
