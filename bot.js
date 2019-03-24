@@ -24,7 +24,7 @@ class Bot {
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         //Имя и версия бота
         this.name = 'Minigames Bot';
-        this.version = '0.7.0';
+        this.version = '0.7.1';
         //Объект с командами
         this.commands = [];
         //
@@ -222,7 +222,7 @@ class Bot {
         this.avatarCreatorID = '447019894735634432';
         this.evalWhitelist = [this.creatorID, this.helperID];
 
-        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0'];
+        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1'];
 
         this.channels = {
             serverLeaveJoin: '558547058286526464',
@@ -241,7 +241,8 @@ class Bot {
             '0.5.0': [`Добавлена команда ${this.prefix}seabattle (морской бой)`],
             '0.6.0': [`Была убрана команда ${this.prefix}seabattle из-за перегрузок', 'Был изменен дизай команды ${this.prefix}help', 'Добавлены команды ${this.prefix}cmd-info \`<Название команды>\` и ${this.prefix}info', 'Крестики-нолики теперь не засоряют чат', '*Пссс, еще был добавлен донат, ${this.prefix}donate, только никому не говори!*`],
             '0.6.1': [`Была добавлена команда ${this.prefix}used, которая позволяет просматривать какие команды чаще используют', 'Функция, которая отправляет информацию о том где и кто использует команды была улучшена ~~(чтобы это увидеть, то нужно прийти к нам на серве...)~~', 'Теперь, каждому репорту бага или идеи присваивается уникальный ID, чтобы на них было легче отвечать`],
-            '0.7.0': ['Optimization and bugfix', 'Translating on English']
+            '0.7.0': ['Optimization and bugfix', 'Translating on English'],
+            '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`']
         };
 
         this.emojis = {
