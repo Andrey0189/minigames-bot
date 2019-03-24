@@ -62,6 +62,7 @@ class Bot {
         //Событие запуска клиента
         _this.client.on('ready', () => {
             _this.prefixes = ['m!', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
+            setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e5);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
             fs.readdir('./Commands', (err, cmds) => {
                 if (err) throw err;
@@ -155,13 +156,13 @@ class Bot {
         this.chooseVariantsCmd = (message, variants, answers, minigameName, difficulty, question) => {
             let seconds = 0;
             let numberOfVariants = 0;
-            if (difficulty.match(/e(asy)?|л(е[гх]ко)?/i)) {
+            if (difficulty.match(/eas[yi]|ле[гх]ко/i)) {
                 seconds = 20;
                 numberOfVariants = 3;
-            } else if (difficulty.match(/h(ard)?|с(ло[жш]но)?|х(ар[дт])?/i)) {
+            } else if (difficulty.match(/har[dt]|сло[жш]но|хар[дт]/i)) {
                 seconds = 15;
                 numberOfVariants = 12;
-            } else if (difficulty.match(/i(mposs?ible?)?|н(евозмо[жш]но)?|ex(tr[ei]me?)?|э(кстрим)?/i)) {
+            } else if (difficulty.match(/imposs?ible?|невозмо[жш]но|extr[ei]me?|[эе]кстрим/i)) {
                 seconds = 15;
                 numberOfVariants = 24;
             } else {
