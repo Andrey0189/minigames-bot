@@ -77,11 +77,12 @@ module.exports.run = (message, args) => {
                       const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === currentPlayer, { time: 60000 });
                       collector.on('collect', msg => {
                           collector.stop();
-                          const number = parseInt(msg.content)
+                          const number = parseInt(msg.content);
+                          const prefix = Bot.prefixes.find(p => msg.content.startsWith(p));
                           if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                               return Bot.err(message, 'Invalid number of the field was provided');
                               return moveWithOpponent(currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);
-                          } else if (msg.content.toLowerCase() === 'end' || msg.content.startsWith(bot.prefix)) return message.reply('Вы успешно остановили игру');
+                          } else if (msg.content.toLowerCase() === 'end' || prefix) return message.reply('Game stopped succesfully');
 
                           msg.delete();
 
@@ -152,11 +153,12 @@ module.exports.run = (message, args) => {
                       const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                       collector.on('collect', msg => {
                           collector.stop();
-                          const number = parseInt(msg.content)
+                          const number = parseInt(msg.content);
+                          const prefix = Bot.prefixes.find(p => msg.content.startsWith(p));
                           if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                               Bot.err(message, 'Invalid number of the field was provided')
                               return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                          } else if (msg.content.toLowerCase() === 'end') return message.reply('Game was stopped successfully')
+                          } else if (msg.content.toLowerCase() === 'end' || prefix) return message.reply('Game was stopped successfully')
 
                           msg.delete();
 
