@@ -24,7 +24,7 @@ class Bot {
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         //Имя и версия бота
         this.name = 'Minigames Bot';
-        this.version = '0.7.1';
+        this.version = '0.7.2';
         //Объект с командами
         this.commands = [];
         //
@@ -61,7 +61,7 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
-            _this.prefixes = ['m!', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
+            _this.prefixes = ['11', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
             setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
             fs.readdir('./Commands', (err, cmds) => {
@@ -81,8 +81,7 @@ class Bot {
             })
         })
 
-
-        _this.client.on('message', message => {
+        _this.onMessage = (message) => {
             const prefix = _this.prefixes.find(p => message.content.startsWith(p));
             if (!message.guild || message.author.bot) return;
             //something
@@ -92,7 +91,34 @@ class Bot {
             const command = args.shift().toLowerCase();
 
             const cmd = _this.commands.find(c => command.match(new RegExp(c.regex)));
-            if (cmd && (!cmd.private || message.author.id === _this.creatorID)) cmd.run(message, args, command);
+            if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
+                cmd.run(message, args, command);
+
+                const log = async () => {
+                  const authorAvatar = message.author.avatarURL || message.author.defaultAvatarURL;
+                  const avatar = await _this.jimp.read(authorAvatar);
+                  avatar.resize(50, 50)
+                  const bg = await _this.jimp.read(_this.images.bg);
+                  bg.composite(avatar, 10, 15);
+                  const font = await _this.jimp.loadFont(_this.jimp.FONT_SANS_16_WHITE);
+                  bg.print(font, 80, 20, message.author.username);
+                  const mentionReg = /<@!?(\d+)?>/;
+                  let user;
+                  if (args.join(' ').match(mentionReg)) user = `@${_this.client.users.get(args.join(' ').match(mentionReg)[1]).tag}`
+                  bg.print(font, 80, 43, message.content.replace(mentionReg, user));
+                  bg.getBuffer(_this.jimp.MIME_PNG, (err, buffer) => {
+                      const screenshot = new Discord.Attachment(buffer, 'screenshot.png');
+                      const embed = new Discord.RichEmbed()
+                      .setAuthor(message.author.tag, authorAvatar)
+                      .setDescription(`\`${message.author.tag}\` used command **${prefix}${command}** ${(args[0]? `\`${args.join(' ').replace(mentionReg, user)}\`` : '`no args`')} on the server \`${message.guild.name}\``)
+                      .attachFile(screenshot)
+                      .setColor(_this.colors.green);
+                      _this.sendIn(_this.channels.commandsUsing, embed);
+                  });
+                };
+
+                log();
+            }
 
             if (command === 'help') {
                 const page = parseInt(args[0]) || 1;
@@ -106,7 +132,10 @@ class Bot {
                 .setFooter('<> with ❤ by ANDREY#2623')
                 message.channel.send(embed);
             }
-        });
+        };
+
+        _this.client.on('message', msg => _this.onMessage(msg));
+        _this.client.on('messageUpdate', (oldMsg, msg) => _this.onMessage(msg));
 
         _this.client.on('guildCreate', (guild) => {
             const embed = new Discord.RichEmbed()
@@ -123,7 +152,7 @@ class Bot {
             let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
             if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! https://discord.gg/DxptT7N`);
         });
-        
+
         this.client.on('guildDelete', (guild) => {
             const embed = new Discord.RichEmbed()
             .addField(':outbox_tray: Server was removed', `
@@ -219,7 +248,7 @@ class Bot {
 
         this.creatorID = '242975403512168449';
         this.helperID = '421030089732653057';
-        this.avatarCreatorID = '447019894735634432';
+        this.avatarCreatorID = '453531199894323201';
         this.evalWhitelist = [this.creatorID, this.helperID];
 
         this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1'];
@@ -242,7 +271,8 @@ class Bot {
             '0.6.0': [`Была убрана команда ${this.prefix}seabattle из-за перегрузок', 'Был изменен дизай команды ${this.prefix}help', 'Добавлены команды ${this.prefix}cmd-info \`<Название команды>\` и ${this.prefix}info', 'Крестики-нолики теперь не засоряют чат', '*Пссс, еще был добавлен донат, ${this.prefix}donate, только никому не говори!*`],
             '0.6.1': [`Была добавлена команда ${this.prefix}used, которая позволяет просматривать какие команды чаще используют', 'Функция, которая отправляет информацию о том где и кто использует команды была улучшена ~~(чтобы это увидеть, то нужно прийти к нам на серве...)~~', 'Теперь, каждому репорту бага или идеи присваивается уникальный ID, чтобы на них было легче отвечать`],
             '0.7.0': ['Optimization and bugfix', 'Translating on English'],
-            '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`']
+            '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
+            '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`']
         };
 
         this.emojis = {
@@ -266,8 +296,8 @@ class Bot {
         };
 
         this.images = {
-            circle: 'https://cdn.discordapp.com/attachments/492028926919573506/540953553523703808/circle.png',
-            bg: 'https://cdn.discordapp.com/attachments/492028926919573506/540957076508114944/background.png',
+            circle: 'https://cdn.discordapp.com/attachments/496233900071321602/559780092964765697/SPOILER_krug.png',
+            bg: 'https://cdn.discordapp.com/attachments/496233900071321602/559779189142716464/unknown.png',
 
             ttt: {
                 field: 'https://cdn.discordapp.com/attachments/524159437464797184/526470580115996672/tttField.png',
