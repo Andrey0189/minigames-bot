@@ -9,7 +9,7 @@ module.exports.info = {
 module.exports.run = (message, args) => {
     const version = args[0] || Bot.version;
     if (!Bot.versionsList.includes(version)) return Bot.err(message, `Invalid version code was provided. Version codes:\n${Bot.versionsList.join(', ')}`);
-    const embed = new new Bot.Discord.RichEmbed()
+    const embed = new Bot.Discord.RichEmbed()
     .setAuthor(`Version ${version}`, message.author.avatarURL)
     .setDescription(`**•** ${Bot.versions[version].join('\n\n**•** ')}`)
     .setColor(Bot.colors.main)
