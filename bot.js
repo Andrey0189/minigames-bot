@@ -61,7 +61,7 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
-            _this.prefixes = ['11', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
+            _this.prefixes = ['m!', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
             setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
             fs.readdir('./Commands', (err, cmds) => {
