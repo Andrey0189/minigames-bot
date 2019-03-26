@@ -13,6 +13,6 @@ module.exports.run = (message, args) => {
     .setAuthor(`Version ${version}`, message.author.avatarURL)
     .setDescription(`**•** ${Bot.versions[version].join('\n\n**•** ')}`)
     .setColor(Bot.colors.main)
-    .setFooter(`<> with ❤ by ${Bot.client.users.get(Bot.creatoID).tag}`);
+    .setFooter(`<> with ❤ by ${Bot.client.users.get(Bot.creatorID).tag}`);
     message.channel.send(embed);
 }
