@@ -28,7 +28,7 @@ class Bot {
         //Объект с командами
         this.commands = [];
         //
-        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#2623');
+        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by one person');
         //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
@@ -129,7 +129,7 @@ class Bot {
                 .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
                 .setColor(_this.colors.main)
                 .addField('More info', `**:link: Official server: ${_this.serverLink}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - https://donatebot.io/checkout/496233900071321600\n◽ Type ${_this.prefixes[0]}donate for more info**`)
-                .setFooter('<> with ❤ by ANDREY#2623')
+                .setFooter('<> with ❤ by one person')
                 message.channel.send(embed);
             }
         };
