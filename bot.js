@@ -128,7 +128,6 @@ class Bot {
                 .setAuthor('Help', message.author.avatarURL)
                 .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
                 .setColor(_this.colors.main)
-                .addField('More info', `**:link: Official server: ${_this.serverLink}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - https://donatebot.io/checkout/496233900071321600\n◽ Type ${_this.prefixes[0]}donate for more info**`)
                 .setFooter('<> with ❤ by one person')
                 message.channel.send(embed);
             }
