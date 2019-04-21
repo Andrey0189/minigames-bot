@@ -1,5 +1,5 @@
 module.exports.info = {
-    name: 'info',
+    name: 'bot-info',
     regex: /bot-?info|invite?/,
     desc: 'Information about bot'
 };
