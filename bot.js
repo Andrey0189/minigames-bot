@@ -28,7 +28,7 @@ class Bot {
         //Объект с командами
         this.commands = [];
         //
-        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by one person');
+        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#2623');
         //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
@@ -128,7 +128,8 @@ class Bot {
                 .setAuthor('Help', message.author.avatarURL)
                 .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
                 .setColor(_this.colors.main)
-                .setFooter('<> with ❤ by one person')
+                .addField('More info', `**:link: Official server: ${_this.serverLink}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - https://donatebot.io/checkout/496233900071321600\n◽ Type ${_this.prefixes[0]}donate for more info**`)
+                .setFooter('<> with ❤ by ANDREY#2623')
                 message.channel.send(embed);
             }
         };
@@ -271,7 +272,7 @@ class Bot {
             '0.6.1': [`Была добавлена команда ${this.prefix}used, которая позволяет просматривать какие команды чаще используют', 'Функция, которая отправляет информацию о том где и кто использует команды была улучшена ~~(чтобы это увидеть, то нужно прийти к нам на серве...)~~', 'Теперь, каждому репорту бага или идеи присваивается уникальный ID, чтобы на них было легче отвечать`],
             '0.7.0': ['Optimization and bugfix', 'Translating on English'],
             '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
-            '0.7.2': [`Added commands log`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`']
+            '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`']
         };
 
         this.emojis = {
