@@ -1,2 +1,2 @@
 # Minigames Bot
-This open-source Disocrd bot with minigames
+This is open-source Disocrd bot with minigames
