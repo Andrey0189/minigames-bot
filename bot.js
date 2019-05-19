@@ -28,7 +28,7 @@ class Bot {
         //Объект с командами
         this.commands = [];
         //
-        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#2623');
+        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANDREY#2623');
         //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
@@ -82,7 +82,7 @@ class Bot {
         })
 
         _this.onMessage = (message) => {
-            const prefix = _this.prefixes.find(p => message.content.startsWith(p));
+            const prefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
             if (!message.guild || message.author.bot) return;
             //something
             if (!prefix) return;
