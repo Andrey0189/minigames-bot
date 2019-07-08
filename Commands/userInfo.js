@@ -1,14 +1,13 @@
 module.exports.info = {
     name: 'user-info',
     desc: 'Information about user',
-    regex: /user-?info/,
+    regex: /user/,
     hidden: true
 };
 
-module.exports.run = (message, args) => {
+module.exports.run = (message, args, mentionMember) => {
     const argsReg = new RegExp(args[1] || null, 'i');
-    const mention = message.content.match(/ <@!?(\d+)>/);
-    const user = Bot.client.users.find(u => u.tag.match(argsReg) || u.id === args[1]) || mention? Bot.client.users.get(mention[1]) : null || message.author;
+    const user = Bot.client.users.find(u => u.tag.match(argsReg) || u.id === args[1]) || message.mentions.users.find(m => m.id !== Bot.client.user.id) || message.author;
     const member = message.guild.members.get(user.id);
     const status = user.presence.status[0].toUpperCase() + user.presence.status.slice(1);
     let mutualServers = Bot.client.guilds.map(guild => {
