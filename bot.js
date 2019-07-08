@@ -272,7 +272,7 @@ class Bot {
             '0.6.1': [`Была добавлена команда ${this.prefix}used, которая позволяет просматривать какие команды чаще используют', 'Функция, которая отправляет информацию о том где и кто использует команды была улучшена ~~(чтобы это увидеть, то нужно прийти к нам на серве...)~~', 'Теперь, каждому репорту бага или идеи присваивается уникальный ID, чтобы на них было легче отвечать`],
             '0.7.0': ['Optimization and bugfix', 'Translating on English'],
             '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
-            '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`']
+            '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`'],
             '0.7.3': ['Fixed bugs with mentions']
         };
 
