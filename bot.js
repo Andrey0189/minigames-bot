@@ -24,7 +24,7 @@ class Bot {
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         //Имя и версия бота
         this.name = 'Minigames Bot';
-        this.version = '0.7.2';
+        this.version = '0.7.3';
         //Объект с командами
         this.commands = [];
         //
@@ -81,43 +81,43 @@ class Bot {
             })
         })
 
-        _this.onMessage = (message) => {
-            const prefix = _this.prefixes.find(p => message.content.startsWith(p));
+        _this.onMessage = async (message) => {
+            _this.msgPrefix = _this.prefixes.find(p => message.content.startsWith(p));
+            _this.mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
+
             if (!message.guild || message.author.bot) return;
             //something
-            if (!prefix) return;
+            if (!_this.msgPrefix || !message.guild.id === '496233900071321600') return;
 
-            const args = message.content.slice(prefix.length).trim().split(/ +/g);
+            const args = message.content.slice(_this.msgPrefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
+            const mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
 
             const cmd = _this.commands.find(c => command.match(new RegExp(c.regex)));
             if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
-                cmd.run(message, args, command);
-
-                const log = async () => {
-                  const authorAvatar = message.author.avatarURL || message.author.defaultAvatarURL;
-                  const avatar = await _this.jimp.read(authorAvatar);
-                  avatar.resize(50, 50)
-                  const bg = await _this.jimp.read(_this.images.bg);
-                  bg.composite(avatar, 10, 15);
-                  const font = await _this.jimp.loadFont(_this.jimp.FONT_SANS_16_WHITE);
-                  bg.print(font, 80, 20, message.author.username);
-                  const mentionReg = /<@!?(\d+)?>/;
-                  let user;
-                  if (args.join(' ').match(mentionReg)) user = `@${_this.client.users.get(args.join(' ').match(mentionReg)[1]).tag}`
-                  bg.print(font, 80, 43, message.content.replace(mentionReg, user));
-                  bg.getBuffer(_this.jimp.MIME_PNG, (err, buffer) => {
-                      const screenshot = new Discord.Attachment(buffer, 'screenshot.png');
-                      const embed = new Discord.RichEmbed()
-                      .setAuthor(message.author.tag, authorAvatar)
-                      .setDescription(`\`${message.author.tag}\` used command **${prefix}${command}** ${(args[0]? `\`${args.join(' ').replace(mentionReg, user)}\`` : '`no args`')} on the server \`${message.guild.name}\``)
-                      .attachFile(screenshot)
-                      .setColor(_this.colors.green);
-                      _this.sendIn(_this.channels.commandsUsing, embed);
-                  });
-                };
-
-                log();
+                await cmd.run(message, args, mentionMember);
+                const gamno = _this.msgPrefix + command;
+                const authorAvatar = message.author.avatarURL || message.author.defaultAvatarURL;
+                const avatar = await _this.jimp.read(authorAvatar);
+                avatar.resize(50, 50)
+                const bg = await _this.jimp.read(_this.images.bg);
+                bg.composite(avatar, 10, 15);
+                const font = await _this.jimp.loadFont(_this.jimp.FONT_SANS_16_WHITE);
+                bg.print(font, 80, 20, message.author.username);
+                const mentionReg = /<@!?(\d+)?>/g;
+                const mentions = message.content.match(mentionReg);
+                let content = message.content;
+                mentions.forEach(m => content = content.replace(m, `@${_this.client.users.get(m.match(/!/)? m.slice(3, -1) : m.slice(2, -1)).tag}`));
+                bg.print(font, 80, 43, content);
+                bg.getBuffer(_this.jimp.MIME_PNG, (err, buffer) => {
+                    const screenshot = new Discord.Attachment(buffer, 'screenshot.png');
+                    const embed = new Discord.RichEmbed()
+                    .setAuthor(message.author.tag, authorAvatar)
+                    .setDescription(`\`${message.author.tag}\` used command **"${content}"** on the server \`${message.guild.name}\``)
+                    .attachFile(screenshot)
+                    .setColor(_this.colors.green);
+                    _this.sendIn(message.channel.id, embed);
+                });
             }
 
             if (command === 'help') {
@@ -251,12 +251,12 @@ class Bot {
         this.avatarCreatorID = '453531199894323201';
         this.evalWhitelist = [this.creatorID, this.helperID];
 
-        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1', '0.7.2'];
+        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1', '0.7.2', '0.7.3'];
 
         this.channels = {
-            serverLeaveJoin: '569785132857163776',
-            commandsUsing: '569785161659711490',
-            reports: '569785182559666196',
+            serverLeaveJoin: '558547058286526464',
+            commandsUsing: '558547076691263489',
+            reports: '558547100799860746',
             stats: '558548048175955979',
         };
 
@@ -273,6 +273,7 @@ class Bot {
             '0.7.0': ['Optimization and bugfix', 'Translating on English'],
             '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
             '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`']
+            '0.7.3': ['Fixed bugs with mentions']
         };
 
         this.emojis = {
@@ -340,17 +341,17 @@ class Bot {
                 'Uzbekistan', 'China', 'Ukraine', 'Germany', 'France', 'Japan', 'Brasil',
                 'Bangladesh', 'Austria', 'Hungary', 'Nepal', 'Indonesia', 'Uruguay', 'Paraguay',
                 'Argentina', 'Chile', 'Cuba', 'Peru', 'Syria', 'Iraq', 'Iran',
-                'Czech'
+                'Czech Republic',
             ],
 
-            flags: [':flag_zw:', ':flag_hr:', ':flag_lv:', ':flag_kz:', ':flag_ru:', ':flag_gr:',
-                ':flag_dk:', ':flag_ug:', ':flag_fi:', ':flag_by:', ':flag_ro:', ':flag_al:', ':flag_ch:',
-                ':flag_mc:', ':flag_pl:', ':flag_it:', ':flag_us:', ':flag_gb:', ':flag_pt:', ':flag_tr:',
-                ':flag_eg:', ':flag_in:', ':flag_au:', ':flag_nz:', ':flag_sg:', ':flag_my:', ':flag_pk:',
-                ':flag_uz:', ':flag_cn:', ':flag_ua:', ':flag_de:', ':flag_fr:', ':flag_jp:', ':flag_br:',
-                ':flag_bd:', ':flag_at:', ':flag_hu:', ':flag_np:', ':flag_my:', ':flag_uy:', ':flag_py:',
-                ':flag_ar:', ':flag_cl:', ':flag_cu:', ':flag_pf:', ':flag_sy:', ':flag_iq:', ':flag_ir:',
-                ':flag_cz:'
+            flags: ['zw', 'hr', 'lv', 'kz', 'ru', 'gr',
+                'dk', 'ug', 'fi', 'by', 'ro', 'al', 'ch',
+                'mc', 'pl', 'it', 'us', 'gb', 'pt', 'tr',
+                'eg', 'in', 'au', 'nz', 'sg', 'my', 'pk',
+                'uz', 'cn', 'ua', 'de', 'fr', 'jp', 'br',
+                'bd', 'at', 'hu', 'np', 'my', 'uy', 'py',
+                'ar', 'cl', 'cu', 'pf', 'sy', 'iq', 'ir',
+                'cz',
             ],
 
             capitals: ['Harare', 'Zagreb', 'Riga' , 'Astana', 'Moscow', 'Athens',
@@ -360,7 +361,7 @@ class Bot {
                 'Tashkent', 'Beijing', 'Kiev', 'Berlin', 'Paris', 'Tokio', 'Brasília',
                 'Dhaka', 'Vienna', 'Budapest', 'Kathmandu', 'Jakarta', 'Montevideo', 'Asunción',
                 'Buenos Aires', 'Santiago', 'Havana', 'Lima', 'Damascus', 'Baghdad', 'Tehran',
-                'Prague'
+                'Prague',
             ]
         };
     };
