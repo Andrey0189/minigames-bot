@@ -23,12 +23,14 @@ class Bot {
         //Регистрируем бота
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         //Имя и версия бота
-        this.name = 'Minigames Bot';
-        this.version = '0.7.3';
+        this.unstable = false;
+        this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
+        this.version = _this.unstable? 'Rolling Realease' : '0.7.4';
+
         //Объект с командами
         this.commands = [];
-        //
-        this.embed = new Discord.RichEmbed().setFooter('<> with ❤ by ANREY#2623');
+
+        this.embed = new Discord.RichEmbed().setFooter(`<> with ❤ by ANDREY#2623`);
         //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
@@ -37,7 +39,7 @@ class Bot {
             return embed;
         };
 
-        this.err = (message, reason) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
+        this.err = (reason, message) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
 
         this.invalidArgs = (message, cmd) => {
             const embed = _this.embedErr(message).setDescription(`Invalid arguments were provided\n
@@ -61,7 +63,9 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
-            _this.prefixes = ['m!', 'm1', 'м!', 'м1', `<@${this.client.user.id}>`];
+            if (_this.unstable) _this.prefixes = ['m.', 'м.', `<@${this.client.user.id}>`];
+            else _this.prefixes = ['m!', 'м!', `<@${this.client.user.id}>`];
+            _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
             setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
             fs.readdir('./Commands', (err, cmds) => {
@@ -82,7 +86,7 @@ class Bot {
         })
 
         _this.onMessage = async (message) => {
-            _this.msgPrefix = _this.prefixes.find(p => message.content.startsWith(p));
+            _this.msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
             _this.mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
 
             if (!message.guild || message.author.bot) return;
@@ -107,7 +111,7 @@ class Bot {
                 const mentionReg = /<@!?(\d+)?>/g;
                 const mentions = message.content.match(mentionReg);
                 let content = message.content;
-                mentions.forEach(m => content = content.replace(m, `@${_this.client.users.get(m.match(/!/)? m.slice(3, -1) : m.slice(2, -1)).tag}`));
+                if (mentions) mentions.forEach(m => content = content.replace(m, `@${_this.client.users.get(m.match(/!/)? m.slice(3, -1) : m.slice(2, -1)).tag}`));
                 bg.print(font, 80, 43, content);
                 bg.getBuffer(_this.jimp.MIME_PNG, (err, buffer) => {
                     const screenshot = new Discord.Attachment(buffer, 'screenshot.png');
@@ -116,7 +120,7 @@ class Bot {
                     .setDescription(`\`${message.author.tag}\` used command **"${content}"** on the server \`${message.guild.name}\``)
                     .attachFile(screenshot)
                     .setColor(_this.colors.green);
-                    _this.sendIn(message.channel.id, embed);
+                    if (!_this.unstable) _this.sendIn(_this.channels.commandsUsing, embed);
                 });
             }
 
@@ -129,7 +133,7 @@ class Bot {
                 .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
                 .setColor(_this.colors.main)
                 .addField('More info', `**:link: Official server: ${_this.serverLink}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - https://donatebot.io/checkout/496233900071321600\n◽ Type ${_this.prefixes[0]}donate for more info**`)
-                .setFooter('<> with ❤ by ANDREY#2623')
+                .setFooter(`<> with ❤ by ${_this.creatorTag}`)
                 message.channel.send(embed);
             }
         };
@@ -148,9 +152,9 @@ class Bot {
             .setColor(_this.colors.green)
             .setThumbnail(guild.iconURL)
             .setFooter(`Now we have ${_this.client.guilds.size} servers`)
-            _this.sendIn(_this.channels.serverLeaveJoin, embed);
+            if (!_this.unstable) _this.sendIn(_this.channels.serverLeaveJoin, embed);
             let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
-            if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! https://discord.gg/DxptT7N`);
+            if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! ${_this.serverLink}`);
         });
 
         this.client.on('guildDelete', (guild) => {
@@ -164,7 +168,7 @@ class Bot {
             .setColor(_this.colors.red)
             .setThumbnail(guild.iconURL)
             .setFooter(`Now we have ${_this.client.guilds.size} servers`)
-            _this.sendIn(_this.channels.serverLeaveJoin, embed);
+            if (!_this.unstable)  _this.sendIn(_this.channels.serverLeaveJoin, embed);
         });
 
 
@@ -172,7 +176,7 @@ class Bot {
         * Costants
         */
 
-        this.serverLink = 'https://discord.gg/bM6eVMt';
+        this.serverLink = 'https://discord.gg/6FKP7f2';
 
         this.colors = {
             discord: '36393F',
@@ -206,7 +210,7 @@ class Bot {
             .setAuthor(`Minigame "${minigameName}"`, message.author.avatarURL,)
             .setDescription(`${message.member}, ${question} **"${variants[definder]}"**?`)
             .setColor(_this.colors.main)
-            .setFooter(`Write of the correct answer number down bellow (You have only ${seconds} seconds!)`)
+            .setFooter(`Write the correct number down bellow (You have only ${seconds} seconds!)`)
             .setTimestamp();
             for (let i = 1; i < numberOfVariants + 1; i++) {
                 let answer = answers[_this.random(0, answers.length - 1)];
@@ -254,10 +258,10 @@ class Bot {
         this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1', '0.7.2', '0.7.3'];
 
         this.channels = {
-            serverLeaveJoin: '558547058286526464',
-            commandsUsing: '558547076691263489',
-            reports: '558547100799860746',
-            stats: '558548048175955979',
+            commandsUsing: '631025205430583306',
+            serverLeaveJoin: '631025228100927488',
+            reports: '631025248371998721',
+            // stats: '558548048175955979',
         };
 
         this.versions = {
