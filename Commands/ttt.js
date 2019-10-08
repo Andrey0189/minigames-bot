@@ -150,18 +150,17 @@ module.exports.run = (message, args) => {
                     console.log('draw');
                     return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedDraw});
                   }
-                  message.reply(`Type the number of the field down bellow (1-9)\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
+                  message.reply(`Type the number of the field down bellow (1-9) or "stop" to stop the game\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
                       const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
                       collector.on('collect', msg => {
                           collector.stop();
                           const number = parseInt(msg.content);
                           const prefix = Bot.prefixes.find(p => msg.content.startsWith(p));
+                          msg.delete();
                           if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
                               Bot.err(message, 'Invalid number of the field was provided')
                               return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                          } else if (msg.content.toLowerCase() === 'end' || prefix) return message.reply('Game was stopped successfully')
-
-                          msg.delete();
+                          } else if (msg.content.toLowerCase() === 'stop' || prefix) return message.reply('Game was stopped successfully')
 
                           Bot.jimp.read(Bot.images.ttt.circle, (err, circle) => {
                               field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
