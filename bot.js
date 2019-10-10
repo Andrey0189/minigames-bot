@@ -39,7 +39,7 @@ class Bot {
             return embed;
         };
 
-        this.err = (reason, message) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
+        this.err = (message, reason) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
 
         this.invalidArgs = (message, cmd) => {
             const embed = _this.embedErr(message).setDescription(`Invalid arguments were provided\n
