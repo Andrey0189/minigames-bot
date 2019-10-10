@@ -5,7 +5,7 @@ module.exports.info = {
 };
 
 module.exports.run = (message) => {
-    if (Bot.unstable) return Bot.err(`Unstable version is private. So, to invite it you should have the Donator role on our official server ${Bot.serverLink}`, message)
+    if (Bot.unstable) return Bot.err(message, `Unstable version is private. So, to invite it you should have the Donator role on our official server ${Bot.serverLink}`);
     const embed = new Bot.Discord.RichEmbed()
     .setAuthor('Information about bot', message.author.avatarURL)
     .addField('Base Info', `**Servers: \`${Bot.addCommas(Bot.client.guilds.size)}\`\nChannels: \`${Bot.addCommas(Bot.client.channels.size)}\`\nUsers: \`${Bot.addCommas(Bot.client.users.size)}\`\nRAM: \`${Bot.addCommas(Math.round(process.memoryUsage().rss / 1024 / 1024 ))}/1,024 MB\`**`)

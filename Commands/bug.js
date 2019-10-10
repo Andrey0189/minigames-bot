@@ -6,7 +6,7 @@ module.exports.info = {
 };
 
 module.exports.run = (message, args) => {
-  if (Bot.unstable) return Bot.err('You can\'t use this command in unstable version', message);
+  if (Bot.unstable) return Bot.err(message, 'You can\'t use this command in unstable version');
   if (!args[0]) return Bot.invalidArgs(message, module.exports.info);
   const bug = args.join(' ');
   const id = Bot.random(1e4, 1e5)
