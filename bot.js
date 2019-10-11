@@ -63,8 +63,9 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
-            if (_this.unstable) _this.prefixes = ['m.', 'м.', `<@${this.client.user.id}>`];
-            else _this.prefixes = ['m!', 'м!', `<@${this.client.user.id}>`];
+            if (_this.unstable) _this.prefixes = ['m.', `<@${this.client.user.id}>`];
+            else _this.prefixes = ['m!', 'm1', `<@${this.client.user.id}>`];
+            _this.prefix = _this.prefixes[0];
             _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
             setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
@@ -127,10 +128,10 @@ class Bot {
             if (command === 'help') {
                 const page = parseInt(args[0]) || 1;
                 const helpCommands = _this.commands.filter(c => !c.private && !c.hidden)
-                const arr = helpCommands.map(cmd => `◽ **${cmd.name} ${cmd.args?`\`${cmd.args}\``:''} -** ${cmd.desc}`);
+                const arr = helpCommands.map(cmd => `◽ **${_this.prefix + cmd.name} ${cmd.args?`\`${cmd.args}\``:''} -** ${cmd.desc}`);
                 const embed = new Discord.RichEmbed()
                 .setAuthor('Help', message.author.avatarURL)
-                .setDescription(`**\`<...>\` - Require parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
+                .setDescription(`**\`<...>\` - Required parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
                 .setColor(_this.colors.main)
                 .addField('More info', `**:link: Official server: ${_this.serverLink}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - https://donatebot.io/checkout/496233900071321600\n◽ Type ${_this.prefixes[0]}donate for more info**`)
                 .setFooter(`<> with ❤ by ${_this.creatorTag}`)
@@ -193,11 +194,8 @@ class Bot {
                 seconds = 20;
                 numberOfVariants = 3;
             } else if (difficulty.match(/har[dt]|сло[жш]но|хар[дт]/i)) {
-                seconds = 15;
+                seconds = 8;
                 numberOfVariants = 12;
-            } else if (difficulty.match(/imposs?ible?|невозмо[жш]но|extr[ei]me?|[эе]кстрим/i)) {
-                seconds = 15;
-                numberOfVariants = 24;
             } else {
               seconds = 10;
               numberOfVariants = 6;
@@ -210,19 +208,19 @@ class Bot {
             .setAuthor(`Minigame "${minigameName}"`, message.author.avatarURL,)
             .setDescription(`${message.member}, ${question} **"${variants[definder]}"**?`)
             .setColor(_this.colors.main)
-            .setFooter(`Write the correct number down bellow (You have only ${seconds} seconds!)`)
+            .setFooter(`Write the correct answer down bellow (You have only ${seconds} seconds!)`)
             .setTimestamp();
             for (let i = 1; i < numberOfVariants + 1; i++) {
                 let answer = answers[_this.random(0, answers.length - 1)];
                 if (i === numberInList) answer = answers[definder];
-                variantsInMenu.forEach(variantInMenu => {
-                    while (answer === variantInMenu) answer = answers[_this.random(0, answers.length - 1)];
+                else variantsInMenu.forEach(variantInMenu => {
+                    while ([variantInMenu, answers[definder]].includes(answer)) answer = answers[_this.random(0, answers.length - 1)];
                 })
                 variantsInMenu.push(answer);
                 embed.addField(`${i})`, `**${answer}**`, true);
             }
             message.channel.send({embed}).then(() => {
-                const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: seconds * 1000 });
+                const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: seconds * 1e3 });
                 collector.on('collect', msg => {
                     collector.stop();
                     function youLose () {
@@ -255,7 +253,7 @@ class Bot {
         this.avatarCreatorID = '453531199894323201';
         this.evalWhitelist = [this.creatorID, this.helperID];
 
-        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1', '0.7.2', '0.7.3'];
+        this.versionsList = ['0.1.0', '0.2.0', '0.3.0', '0.3.1', '0.3.2', '0.4.0', '0.5.0', '0.6.0', '0.6.1', '0.7.0', '0.7.1', '0.7.2', '0.7.3', '0.7.4'];
 
         this.channels = {
             commandsUsing: '631025205430583306',
@@ -277,7 +275,8 @@ class Bot {
             '0.7.0': ['Optimization and bugfix', 'Translating on English'],
             '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
             '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`'],
-            '0.7.3': ['Fixed bugs with mentions']
+            '0.7.3': ['Fixed bugs with mentions'],
+            '0.7.4': ['A lot of bugs with capitals/countries and other commands commands were fixed', 'Removed some partially useless commands', 'Other minor changes']
         };
 
         this.emojis = {
