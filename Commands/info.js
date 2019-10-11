@@ -1,5 +1,5 @@
 module.exports.info = {
-    name: 'info',
+    name: 'invite',
     regex: /bot-?info|invite?/,
     desc: 'Information about bot'
 };
@@ -12,6 +12,6 @@ module.exports.run = (message) => {
     .addField('Our Team', `**${Bot.client.users.get(Bot.creatorID)} \`${Bot.client.users.get(Bot.creatorID).tag}\` - Main developer and designer\n${Bot.client.users.get(Bot.helperID)} \`${Bot.client.users.get(Bot.helperID).tag}\` - Helper\n${Bot.client.users.get(Bot.avatarCreatorID)} \`${Bot.client.users.get(Bot.avatarCreatorID).tag}\` - Creator of the avatar for Minigames Bot**`)
     .setTitle('Invite Bot')
     .setURL(`https://discordapp.com/oauth2/authorize?client_id=${Bot.client.user.id}&scope=bot&permissions=379904`)
-    .setColor(Bot.colors.main)
-    message.channel.send(embed)
+    .setColor(Bot.colors.main);
+    message.channel.send(embed);
 };

@@ -10,7 +10,7 @@ module.exports.run = (message) => {
     console.log(guildsCollection.first().name);
     const guilds = guildsCollection.map(guild => `Name: ${guild.name}\nID: ${guild.id}\nObjects count: m: ${guild.memberCount}, r: ${guild.roles.size}, ch: ${guild.channels.size}, e: ${guild.emojis.size}\nOwner: ${guild.owner.user.id} ${guild.owner.user.tag}\nCreated at: ${Bot.toMoscowTime(guild.createdAt)}`);
     try {
-        Bot.hastebin(guilds.join(`\n\n${'='.repeat(50)}\n\n`), 'txt').then(link => message.channel.send(`Servers list --> ${link}`))
+        Bot.hastebin(guilds.join(`\n\n${'='.repeat(50)}\n\n`), 'txt').then(link => message.channel.send(`Servers list --> ${link}`));
     } catch (err) {
         message.channel.send(`//Error ❎\n${err}`, {code: 'js'})
     };
