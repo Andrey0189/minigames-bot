@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 /** @namespace process.env.BOT_TOKEN */
 /** @namespace process.env.DB_LINK */
 
-mongoose.connect(process.env.DB_LINK, {}, err => {
+mongoose.connect(process.env.DB_LINK, {useNewUrlParser: true}, err => {
   if (!err) console.log('Successfully connected to database');
   else console.log(err);
 });
