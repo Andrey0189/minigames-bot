@@ -11,7 +11,7 @@ module.exports.run = async (message, args) => {
   if (!args[0] || !['capitals', 'countries', 'coins'].includes(args[0])) return Bot.invalidArgs(message, module.exports.info);
   let page = parseInt(args[1]) || 1;
   const data = await Bot.userData.find({});
-  const maxElements = 3;
+  const maxElements = 15;
   const maxPages = Math.ceil(data.length / maxElements);
 
   function sdjgfgd (value1, value2, value3) {
