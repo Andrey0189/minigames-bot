@@ -3,9 +3,15 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const hastebin = require('hastebin-gen');
 const jimp = require('jimp');
+const mongoose = require('mongoose');
 
 //Переменные среды
 /** @namespace process.env.BOT_TOKEN */
+/** @namespace process.env.DB_LINK */
+
+mongoose.connect(process.env.DB_LINK, {}, err => {
+  if (!err) console.log('Successfully connected to database');
+});
 
 //Класс бота
 class Bot {
@@ -18,14 +24,33 @@ class Bot {
         this.fs = fs;
         this.hastebin = hastebin;
         this.jimp = jimp;
+        this.mongoose = mongoose;
         //Создаем клиент бота
         this.client = new Discord.Client({disableEveryone: true});
         //Регистрируем бота
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
+        this.userSchema = new mongoose.Schema({
+          id: String,
+          coins: Number,
+          countries: {
+            raiting: Number,
+            strike: Number
+          },
+          capitals: {
+            raiting: Number,
+            strike: Number
+          },
+          ttt: {
+            raiting: Number,
+            strike: Number
+          }
+        });
+
+        this.userData = mongoose.model('userData', _this.userSchema);
         //Имя и версия бота
         this.unstable = false;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
-        this.version = _this.unstable? 'Rolling Realease' : '0.7.4';
+        this.version = _this.unstable? 'Rolling Realease' : 'alpha 0.8.0';
 
         //Объект с командами
         this.commands = [];
@@ -61,6 +86,12 @@ class Bot {
 
         this.toMoscowTime = (time) => time.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\/|\./g, '-');
 
+        this.multipleReact = async (message, arr) => {
+          if (0 in arr) {
+            await message.react(arr.shift()).then(() => _this.multipleReact(message, arr).catch());
+          };
+        };
+
         //Событие запуска клиента
         _this.client.on('ready', () => {
             if (_this.unstable) _this.prefixes = ['m.', `<@${this.client.user.id}>`];
@@ -82,9 +113,9 @@ class Bot {
                         private: cmd.info.private || false,
                         hidden: cmd.info.hidden || false,
                     });
-                })
-            })
-        })
+                });
+            });
+        });
 
         _this.onMessage = async (message) => {
             _this.msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
@@ -92,7 +123,26 @@ class Bot {
 
             if (!message.guild || message.author.bot) return;
             //something
-            if (!_this.msgPrefix || !message.guild.id === '496233900071321600') return;
+            if (!_this.msgPrefix) return;
+            if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
+              id: message.author.id,
+              coins: 0,
+              countries: {
+                raiting: 0,
+                strike: 0
+              },
+              capitals: {
+                raiting: 0,
+                strike: 0
+              },
+              ttt: {
+                raiting: 0,
+                strike: 0
+              }
+            });
+
+            const date = new Date();
+            if (date.getDay() === 1) {};
 
             const args = message.content.slice(_this.msgPrefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
@@ -191,7 +241,7 @@ class Bot {
             let seconds = 0;
             let numberOfVariants = 0;
             if (difficulty.match(/eas[yi]|ле[гх]ко/i)) {
-                seconds = 20;
+                seconds = 10;
                 numberOfVariants = 3;
             } else if (difficulty.match(/har[dt]|сло[жш]но|хар[дт]/i)) {
                 seconds = 8;
@@ -200,6 +250,34 @@ class Bot {
               seconds = 10;
               numberOfVariants = 6;
             }
+
+            async function youLose (phrase) {
+              const uData = await _this.userData.findOne({id: message.author.id});
+              let minigame;
+              if (minigameName === 'Guess capital of the country') minigame = uData.capitals;
+              else if (minigameName === 'Guess flag of the country') minigame = uData.countries;
+              minigame.raiting -= 5;
+              minigame.strike = 0;
+              await uData.save();
+              const embed = new _this.Discord.RichEmbed()
+              .setAuthor(phrase, message.author.avatarURL)
+              .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${minigame.raiting}\` now\nYour place in leaderboard is \`nullth\`\nYour strike has been reset**`)
+              .setColor(_this.colors.red)
+              await message.channel.send(embed);
+            } async function youWon () {
+              const uData = await _this.userData.findOne({id: message.author.id});
+              let minigame;
+              if (minigameName === 'Guess capital of the country') minigame = uData.capitals;
+              else if (minigameName === 'Guess flag of the country') minigame = uData.countries;
+              minigame.raiting += 5 * (minigame.strike / 100 + 1);
+              minigame.strike += 1;
+              await uData.save();
+              const embed = new _this.Discord.RichEmbed()
+              .setAuthor('You won!', message.author.avatarURL)
+              .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${minigame.raiting}\` now\nYour place in leaderboard is \`nullth\`\nYour strike is \`${minigame.strike}\`**`)
+              .setColor(_this.colors.green)
+              await message.channel.send(embed);
+            };
 
             const definder = _this.random(0, variants.length - 1);
             const numberInList = _this.random(1, numberOfVariants);
@@ -218,32 +296,20 @@ class Bot {
                 })
                 variantsInMenu.push(answer);
                 embed.addField(`${i})`, `**${answer}**`, true);
-            }
+            };
             message.channel.send({embed}).then(() => {
                 const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: seconds * 1e3 });
+                const stopTimer = setTimeout(() => {
+                  return youLose('Time is up! You lose >:D')
+                }, seconds * 1e3)
                 collector.on('collect', msg => {
+                    clearTimeout(stopTimer);
                     collector.stop();
-                    function youLose () {
-                        const embed = new _this.Discord.RichEmbed()
-                        .setAuthor('You lose >:D', message.author.avatarURL)
-                        .setDescription(`The correct answer is **${numberInList})** ${answers[definder]}`)
-                        .setColor(_this.colors.red)
-                        message.channel.send(embed);
-                    }
                     if (msg.content || !isNaN(parseInt(msg.content))) {
                         const number = parseInt(msg.content) - 1;
-
-                        if (variantsInMenu[number] === answers[definder]) {
-                            const embed = new _this.Discord.RichEmbed()
-                            .setAuthor('You won!', message.author.avatarURL)
-                            .setDescription(`The correct answer is **${numberInList})** ${answers[definder]}`)
-                            .setColor(_this.colors.green)
-                            message.channel.send(embed);
-                        }
-
-                        else youLose();
-
-                    } else youLose();
+                        if (variantsInMenu[number] === answers[definder]) youWon();
+                        else youLose('You lose >:D');
+                    } else youLose('You chose an invalid number :/');
                 })
             });
         }
@@ -276,7 +342,7 @@ class Bot {
             '0.7.1': ['Fixed bug with difficulties in `m!countries` and `m!capitals`', 'Fixed bug with multiplayer in`m!ttt`'],
             '0.7.2': [`Added commands log (You can see log in ${_this.serverLink})`, 'Now bot answers on the commands after the message was edited', 'Fixed bug with `m!update`'],
             '0.7.3': ['Fixed bugs with mentions'],
-            '0.7.4': ['A lot of bugs with capitals/countries and other commands commands were fixed', 'Removed some partially useless commands', 'Other minor changes']
+            '0.7.4': ['A lot of bugs with capitals/countries and other commands commands were fixed', 'Removed some partially useless commands', 'Some other minor changes']
         };
 
         this.emojis = {
