@@ -2,7 +2,7 @@ module.exports.info = {
   name: 'countries',
   regex: /countr(ies|y)|стран[ыа]/,
   desc: 'Guess flag of the country',
-  args: '[easy | normal | hard | extreme]',
+  args: '[easy | normal | hard]',
   example: 'hard'
 };
 

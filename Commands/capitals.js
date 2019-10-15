@@ -2,7 +2,7 @@ module.exports.info = {
   name: 'capitals',
   regex: /capitals?|столиц[аы]/,
   desc: 'Guess capital of the country',
-  args: '[easy | normal | hard | extreme]',
+  args: '[easy | normal | hard]',
   example: 'hard'
 };
 
