@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 /** @namespace process.env.BOT_TOKEN */
 /** @namespace process.env.DB_LINK */
 
-mongoose.connect('', {useNewUrlParser: true, useUnifiedTopology: true}, err => {
+mongoose.connect(process.env.DB_LINK, {useNewUrlParser: true, useUnifiedTopology: true}, err => {
   if (!err) console.log('Successfully connected to database');
   else console.log(err);
 });
@@ -29,7 +29,7 @@ class Bot {
         //Создаем клиент бота
         this.client = new Discord.Client({disableEveryone: true});
         //Регистрируем бота
-        this.client.login('').then(() => delete process.env.BOT_TOKEN);
+        this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         this.userSchema = new mongoose.Schema({
           id: String,
           coins: Number,
