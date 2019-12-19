@@ -4,7 +4,6 @@ const fs = require('fs');
 const hastebin = require('hastebin-gen');
 const jimp = require('jimp');
 const mongoose = require('mongoose');
-console.log('test1');
 
 //Переменные среды
 /** @namespace process.env.BOT_TOKEN */
@@ -30,6 +29,7 @@ class Bot {
         //Создаем клиент бота
         this.client = new Discord.Client({disableEveryone: true});
         //Регистрируем бота
+        console.log('test1');
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         this.userSchema = new mongoose.Schema({
           id: String,
