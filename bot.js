@@ -4,6 +4,7 @@ const fs = require('fs');
 const hastebin = require('hastebin-gen');
 const jimp = require('jimp');
 const mongoose = require('mongoose');
+console.log('test1');
 
 //Переменные среды
 /** @namespace process.env.BOT_TOKEN */
@@ -84,6 +85,7 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
+            console.log('test2');
             _this.prefixes.push(`<@${this.client.user.id}>`);
             _this.prefix = _this.prefixes[0];
             _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
