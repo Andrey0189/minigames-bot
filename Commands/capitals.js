@@ -7,6 +7,13 @@ module.exports.info = {
 };
 
 module.exports.run = (message, args) => {
-  //message, variants, answers, minigameName, difficulty, question
-  Bot.chooseVariantsCmd(message, Bot.minigames.countries, Bot.minigames.capitals, module.exports.info.desc, args.join(' '), 'Which city is the capital of');
+  //message, variants, answers, minigameName, difficulty, question, score, seconds, placingAlgoritm
+  Bot.chooseVariantsCmd(message,
+    Bot.minigames.countries,
+    Bot.minigames.capitals,
+    module.exports.info.desc,
+    args.join(' '),
+    variant => `What is the capital of **${variant}**`,
+    5, 10,
+    answers => answers[Bot.random(0, answers.length - 1)]);
 };

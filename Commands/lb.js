@@ -2,33 +2,36 @@ module.exports.info = {
   name: 'top',
   regex: /l(eader)?b(oard?)|top/,
   desc: 'Best players',
-  args: '[countries | capitals | coins]',
-  example: 'capitals',
-  hidden: true
+  args: '[minigames | coins]',
+  example: 'coins'
 };
 
 module.exports.run = async (message, args) => {
-  if (!args[0] || !['capitals', 'countries', 'coins'].includes(args[0])) return Bot.invalidArgs(message, module.exports.info);
+  if (!args[0] || !['minigames', 'coins'].includes(args[0])) return Bot.invalidArgs(message, module.exports.info);
   let page = parseInt(args[1]) || 1;
   const data = await Bot.userData.find({});
-  const maxElements = 15;
-  const maxPages = Math.ceil(data.length / maxElements);
+  const maxElements = 20;
+  const maxPages = Math.ceil(data.filter(u => Bot.client.users.get(u.id) && u.raiting).length / maxElements);
 
-  function sdjgfgd (value1, value2, value3) {
-    if (args[0] === 'capitals') return value1;
-    else if (args[0] === 'countries') return value2;
-    else if (args[0] === 'coins') return value3;
+  function sdjgfgd (value1, value2) {
+    if (args[0] === 'minigames') return value1;
+    else if (args[0] === 'coins') return value2;
   };
 
   function book (page) {
-    const title = sdjgfgd(`Top players ${Bot.prefix}capitals`, `Top players ${Bot.prefix}countries`, `Top richest`)
+    const arr = [];
+    const title = sdjgfgd(`Best players`, `Top richest`)
     const embed = new Bot.Discord.RichEmbed()
     .setAuthor(title, Bot.client.user.avatarURL)
     .setColor(Bot.colors.main)
     .setFooter(`Page ${page}/${maxPages}`);
-    return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on sunday at 11:59 PM (UTC)\n\n') + data.sort((a, b) => sdjgfgd(b.capitals.raiting - a.capitals.raiting, b.countries.raiting - a.countries.raiting, b.coins - a.coins)).map((u, index) => {
-      if (index + 1 <= page * maxElements && index + 1 > (page - 1) * maxElements) return `\`${index + 1}. ${Bot.client.users.get(u.id).tag}:${('.').repeat(35 - Bot.client.users.get(u.id).tag.length)}${sdjgfgd(u.capitals.raiting, u.countries.raiting, u.coins)}\``
-    }).join('\n')}**`);
+
+    data.sort((a, b) => sdjgfgd(b.raiting - a.raiting, b.coins - a.coins)).filter(u => Bot.client.users.get(u.id) && u.raiting).forEach((u, index) => {
+      const usr = Bot.client.users.get(u.id).tag;
+      if (index + 1 <= page * maxElements && index + 1 > (page - 1) * maxElements) arr.push(`\`${index + 1}. ${usr}:${('.').repeat(50 - usr.length)}${sdjgfgd(u.raiting, u.coins)}\``)
+    });
+
+    return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on Jan 1\n\n') + arr.join('\n')}**`);
   };
 
   message.channel.send(book(page)).then(msg => {

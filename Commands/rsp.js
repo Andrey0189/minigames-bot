@@ -46,12 +46,12 @@ module.exports.run = (message, args) => {
         embed = new Bot.Discord.RichEmbed()
         .setAuthor(isWin? 'You won!':'You lose >:D', message.author.avatarURL)
         .setColor(isWin? Bot.colors.green : Bot.colors.red)
-        .setDescription(`**${message.author.username}** - chosed ${choice}\n**${Bot.name}** - chosed ${computerChoice}`)
+        .setDescription(`**${message.author.username}** - chose ${choice}\n**${Bot.name}** - chose ${computerChoice}`)
     } else {
         embed = new Bot.Discord.RichEmbed()
         .setAuthor('Draw!', message.author.avatarURL)
         .setColor(Bot.colors.yellow)
-        .setDescription(`**We chosed** ${choice}`)
+        .setDescription(`**We chose** ${choice}`)
     }
 
     message.channel.send(embed);
