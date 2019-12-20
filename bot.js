@@ -29,7 +29,6 @@ class Bot {
         //Создаем клиент бота
         this.client = new Discord.Client({disableEveryone: true});
         //Регистрируем бота
-        console.log('test1');
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         this.userSchema = new mongoose.Schema({
           id: String,
@@ -85,7 +84,6 @@ class Bot {
 
         //Событие запуска клиента
         _this.client.on('ready', () => {
-            console.log('test2');
             _this.prefixes.push(`<@${this.client.user.id}>`);
             _this.prefix = _this.prefixes[0];
             _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
