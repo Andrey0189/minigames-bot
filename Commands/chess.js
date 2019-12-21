@@ -139,17 +139,10 @@ module.exports.run = async (message, args, mentionMember) => {
           if (whiteSquares.includes(toPlace[2])) await img.composite(whiteSquare, toPlace[0], toPlace[1]);
           else await img.composite(blackSquare, toPlace[0], toPlace[1]);
 
-          console.log('Нащупал');
-
           for (let i = 0; i < figures.length; i++) {
-            console.log(figure);
-            console.log(figures[i]);
             if (figure === figures[i]) {
-            console.log('Зигота');
             const figureImg = await Bot.jimp.read(figuresImgs[i]);
-            console.log('Чо');
             img.composite(figureImg, toPlace[0], toPlace[1]);
-            console.log('Есть пробитие');
             return img;
           }};
         };
