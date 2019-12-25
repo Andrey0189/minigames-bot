@@ -119,7 +119,7 @@ module.exports.run = async (message, args, mentionMember) => {
 
   move = (gameField, img, player) => {
     const otherPlayer = player.id === white.id? black : white;
-    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 6e5 });
+    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 6e4 });
     collector.on('collect', async msg => {
         collector.stop();
 
