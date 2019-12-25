@@ -209,7 +209,7 @@ module.exports.run = async (message, args, mentionMember) => {
             return move(gameField, img, otherPlayer);
           });
         } else if (Bot.prefixes.find(p => msg.content.toLowerCase().startsWith(p)) || msg.content.toLowerCase() === 'stop') return;
-        else return (gameField, img);
+        else return (gameField, img, player);
     });
   };
 
