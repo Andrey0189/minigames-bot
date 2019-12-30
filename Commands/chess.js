@@ -133,17 +133,17 @@ module.exports.run = async (message, args, mentionMember) => {
           to[1]++;
 
           if (!gameField[figureCords[2]] || !gameField[figureCords[2]].match(new RegExp(player.color, 'i'))) {
+            move(gameField, img, player);
             msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`).then(m => m.delete(2e4));
-            msg.delete();
-            return move(gameField, img, player);
+            return msg.delete();
           };
 
           const moves = getMoves(figureCords[2], gameField);
 
           if (!moves.includes(toPlace[2]) && !msg.content.match(/0/i)) {
+            move(gameField, img, player);
             msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
-            msg.delete();
-            return move(gameField, img, player);
+            return msg.delete();
           };
 
           let figure = gameField[figureCords[2]];
@@ -201,9 +201,9 @@ module.exports.run = async (message, args, mentionMember) => {
           }
 
           if (_check && !checkmate) {
+            move(gameFieldCopy, img, player);
             msg.reply('Your king is under attack!').then(m => m.delete(2e4));
-            msg.delete();
-            return move(gameFieldCopy, img, player);
+            return msg.delete();
           };
 
           const blackSquare = await Bot.jimp.read(Bot.images.chess.blackSquare);
@@ -264,9 +264,9 @@ module.exports.run = async (message, args, mentionMember) => {
             if (jump > 0) for (let i = 2; i > 0; i--) if (kingDef + i in gameField) return move(gameField, img, player);
             if (jump < 0) for (let i = -3; i < 0; i++) if (kingDef + i in gameField) return move(gameField, img, player);
           } else {
+            move(gameField, img, player);
             msg.reply('Not all conditions for castling are met').then(m => m.delete(2e4));
-            msg.delete();
-            return move(gameField, img, player);
+            return msg.delete();
           }
 
           const kingJump = jump > 0? 2 : -2;
