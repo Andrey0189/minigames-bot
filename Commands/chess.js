@@ -7,20 +7,20 @@ module.exports.info = {
 };
 
 module.exports.run = async (message, args, mentionMember) => {
-  if (![Bot.creatorID, '401739659945967626', '424254345031188480', '307492203092246528', '428036906723573760', '489443611113422868'].includes(message.author.id)) return;
+  const standartText = `Type the coordinats of the figure, what you want to move and coordinats of the place, where you want to move. Example: \`e7 e5\`\nType \`0-0\` or \`0-0-0\` for castling\nChess are only in __BETA__ so there may be some bugs.\nIf you found any bugs, you can tell about them with command "${Bot.prefix}bug \`<bug desc>\`"`;
   const gameField = Array(64);
   const opponent = mentionMember;
   if (!opponent) return Bot.err(message, 'You didn\'t mention anybody');
 
   const white = {
     id: message.author.id,
-    color: 'white'
+    color: 'white',
   };
 
   const black = {
     id: opponent.id,
-    color: 'black'
-  }
+    color: 'black',
+  };
 
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -68,7 +68,7 @@ module.exports.run = async (message, args, mentionMember) => {
     return [x, y];
   };
 
-  getMoves = (def, gameField) => {
+  getMoves = (def, gameField, checking) => {
     const figure = gameField[def];
 
     extendedMoves = (jump, type) => {
@@ -90,7 +90,7 @@ module.exports.run = async (message, args, mentionMember) => {
       for (let i in toCheck) if (toCheck[i] in gameField && gameField[toCheck[i]].match(new RegExp(colorChange(figure), 'i'))) moves.push(toCheck[i]);
     };
 
-    console.log(`${figure} ${def}`);
+    if (!checking) console.log(`${figure} ${def}`);
     let moves = [];
     if (figure.match(/white pawn/i)) pawnMoves(-8, def >= 48, [-9, -7]);
     else if (figure.match(/black pawn/i)) pawnMoves(8, def <= 16, [9, 7]);
@@ -98,7 +98,7 @@ module.exports.run = async (message, args, mentionMember) => {
       const toCheck = [-17, -15, -10, -6, 6, 10, 15, 17];
       for (let i in toCheck) moves.push(def + toCheck[i]);
     } else if (figure.match(/king/i)) {
-      gameField[def] = figure + '+';
+      if (!checking && !figure.match(/\+/)) gameField[def] = figure + '+';
       const toCheck = [-9, -8, -7, -1, 1, 7, 8, 9];
       for (let i in toCheck) moves.push(def + toCheck[i]);
     } else if (figure.match(/bishop/i)) {
@@ -113,31 +113,98 @@ module.exports.run = async (message, args, mentionMember) => {
       for (let i in jumps) moves = moves.concat(extendedMoves(jumps[i], 'bishop'));
       for (let i in jumps2) moves = moves.concat(extendedMoves(jumps2[i], 'rook'));
     };
-    console.log(moves.filter(n => !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i')))).sort((m1, m2) => m2 - m1));
-    return moves.filter(n => !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i'))));
+    if (!checking) console.log(moves.filter(n => !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i')))).sort((m1, m2) => m2 - m1));
+    return moves.filter(n => n >= 0 && n < 65 && !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i'))));
   };
 
   move = (gameField, img, player) => {
     const otherPlayer = player.id === white.id? black : white;
-    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 6e4 });
+    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 3e5 });
     collector.on('collect', async msg => {
         collector.stop();
-
         const args = msg.content.trim().split(/ +/g);
 
         figurePlace = async (figureCords, toPlace) => {
+          const from = arrToCords(figureCords[2]);
+          const to = arrToCords(toPlace[2]);
+          from[0] = letters[from[0]];
+          from[1]++;
+          to[0] = letters[to[0]];
+          to[1]++;
+
+          if (!gameField[figureCords[2]] || !gameField[figureCords[2]].match(new RegExp(player.color, 'i'))) {
+            await msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`).then(m => m.delete(2e4));
+            msg.delete();
+            return move(gameField, img, player);
+          };
+
           const moves = getMoves(figureCords[2], gameField);
 
-          if (!gameField[figureCords[2]].match(new RegExp(player.color, 'i')) || (!moves.includes(toPlace[2]) && !msg.content.match(/o/i))) {
-            await message.reply('Ты не можешь сюда пойти алло');
+          if (!moves.includes(toPlace[2]) && !msg.content.match(/0/i)) {
+            await msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
+            msg.delete();
             return move(gameField, img, player);
           };
 
           let figure = gameField[figureCords[2]];
 
+          const gameFieldCopy = gameField.concat([]);
           delete gameField[toPlace[2]];
           delete gameField[figureCords[2]];
           gameField[toPlace[2]] = figure;
+
+          let kingDef;
+          gameField.forEach((c, index) => { if (c && c.match(new RegExp(`${player.color} king`, 'i'))) kingDef = index });
+          let otherKingDef;
+          gameField.forEach((c, index) => { if (c && c.match(new RegExp(`${otherPlayer.color} king`, 'i'))) otherKingDef = index });
+          let _check = false;
+          let checkmate = false;
+          gameField.forEach((f, index) => {
+            if (f.match(new RegExp(otherPlayer.color, 'i'))) {
+              const moves = getMoves(index, gameField, true);
+              if (moves.includes(kingDef)) {
+                _check = true;
+              };
+            } else if (f.match(new RegExp(player.color, 'i'))) {
+              const moves = getMoves(index, gameField, true);
+              if (moves.includes(otherKingDef)) {
+                checkmate = true;
+              }
+            };
+          });
+
+          if (checkmate) gameField.forEach((f, index) => {
+            if (f.match(new RegExp(otherPlayer.color, 'i')) && checkmate) {
+              getMoves(index, gameField, true).forEach(move => {
+                const fieldTest = gameField.concat([]);
+                delete fieldTest[index];
+                delete fieldTest[move];
+                fieldTest[move] = f;
+                let otherMoves = [];
+                let otherKingDef;
+                fieldTest.forEach((c, i) => { if (c && c.match(new RegExp(`${otherPlayer.color} king`, 'i'))) otherKingDef = i });
+                fieldTest.forEach((otherFigure, otherIndex) => {
+                  if (otherFigure.match(new RegExp(player.color, 'i'))) otherMoves = otherMoves.concat(getMoves(otherIndex, fieldTest, true));
+                });
+
+                if (!otherMoves.includes(otherKingDef)) {
+                  console.log(`If you move figure ${f} on ${move}, you won't die btw`)
+                  return checkmate = false;
+                }
+              });
+            };
+          });
+
+          if (checkmate) {
+            message.channel.send('Checkmate');
+            return 'checkmate'
+          }
+
+          if (_check && !checkmate) {
+            msg.reply('Your king is under attack!').then(m => m.delete(2e4));
+            msg.delete();
+            return move(gameFieldCopy, img, player);
+          };
 
           const blackSquare = await Bot.jimp.read(Bot.images.chess.blackSquare);
           const whiteSquare = await Bot.jimp.read(Bot.images.chess.whiteSquare);
@@ -172,16 +239,22 @@ module.exports.run = async (message, args, mentionMember) => {
             const moveCords = piadap(xSet, ySet);
 
             img = await figurePlace(coordinats, moveCords);
+            if (img === 'checkmate') return message.channel.send(`${player.id === message.author.id? opponent : message.author} Won!`)
 
-            img.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-              message.channel.send(`**${player.id === message.author.id? opponent : message.author}, your move.\nType \`o-o\` or \`o-o-o\` for castling btw**`, {files: [{ name: 'field.png', attachment: buffer }]});
-              return move(gameField, img, otherPlayer);
-            });
-        } else if (msg.content.match(/o-o(-o)?/i)) {
+            try {
+              img.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
+                if (err) return move(gameField, img, otherPlayer);
+                message.channel.send(`**${msg.author.username} successfully moved \`${gameField[moveCords[2]]}\` from \`${x}${y}\` to \`${xSet}${ySet}\`\n${player.id === message.author.id? opponent : message.author}, your move.\n${standartText}**`, {files: [{ name: 'field.png', attachment: buffer }]});
+                return move(gameField, img, otherPlayer);
+              });
+            } catch (e) {};
+
+        } else if (msg.content.match(/0-0(-0)?/i)) {
+          console.log('castle')
           const jump = msg.content.length < 4? 3 : -4;
           let kingDef;
           const king = gameField.find((c, index) => {
-            if (c && c.match(new RegExp(player.color, 'i')) && !c.match(/\+/)) {
+            if (c && c.match(new RegExp(`${player.color} king`, 'i')) && !c.match(/\+/)) {
               kingDef = index;
               return true;
             };
@@ -190,7 +263,11 @@ module.exports.run = async (message, args, mentionMember) => {
           if (king && kingDef + jump in gameField && gameField[kingDef + jump].match(new RegExp(`${player.color} rook`, 'i'))) {
             if (jump > 0) for (let i = 2; i > 0; i--) if (kingDef + i in gameField) return move(gameField, img, player);
             if (jump < 0) for (let i = -3; i < 0; i++) if (kingDef + i in gameField) return move(gameField, img, player);
-          };
+          } else {
+            msg.reply('Not all conditions for castling are met').then(m => m.delete(2e4));
+            msg.delete();
+            return move(gameField, img, player);
+          }
 
           const kingJump = jump > 0? 2 : -2;
           const rookJump = jump > 0? -2 : 3;
@@ -198,18 +275,19 @@ module.exports.run = async (message, args, mentionMember) => {
           const y = arrToCords(kingDef)[1] + 1;
           const x = arrToCords(kingDef)[0] + 1;
           const rookX = arrToCords(kingDef + jump)[0] + 1;
-          console.log(`Old: ${piadap(x, y)[2]} ${piadap(rookX, y)[2]}\nNew: ${piadap(x + kingJump, y)[2]} ${piadap(rookX + rookJump, y)[2]}`);
-          console.log(`${x} ${y}`);
 
           img = await figurePlace(piadap(x, y), piadap(x + kingJump, y));
           img = await figurePlace(piadap(rookX, y), piadap(rookX + rookJump, y));
 
           img.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-            message.channel.send(`**${player.id === message.author.id? opponent : message.author}, your move.\nType \`o-o\` or \`o-o-o\` for castling btw**`, {files: [{ name: 'field.png', attachment: buffer }]});
+            message.channel.send(`**${msg.author.username} was successfully castled.\n${player.id === message.author.id? opponent : message.author}, your move.\nType \`0-0\` or \`0-0-0\` for castling btw**`, {files: [{ name: 'field.png', attachment: buffer }]});
             return move(gameField, img, otherPlayer);
           });
         } else if (Bot.prefixes.find(p => msg.content.toLowerCase().startsWith(p)) || msg.content.toLowerCase() === 'stop') return;
-        else return (gameField, img, player);
+        else {
+          move(gameField, img, player);
+          return msg.delete(2e4);
+        }
     });
   };
 
@@ -229,6 +307,6 @@ module.exports.run = async (message, args, mentionMember) => {
   gameField[60] = figures[5];
 
   field.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-    message.channel.send({files: [{ name: 'field.png', attachment: buffer }]}).then(() => move(gameField, field, white))
+    message.channel.send(`**${message.author}, your move\n${standartText}**`, {files: [{ name: 'field.png', attachment: buffer }]}).then(() => move(gameField, field, white))
   });
 };
