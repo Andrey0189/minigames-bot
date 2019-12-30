@@ -3,6 +3,7 @@ module.exports.info = {
   regex: /ch(ess)?/,
   args: '[user]',
   desc: 'Chess',
+  hidden: true,
 };
 
 module.exports.run = async (message, args, mentionMember) => {
@@ -132,7 +133,7 @@ module.exports.run = async (message, args, mentionMember) => {
           to[1]++;
 
           if (!gameField[figureCords[2]] || !gameField[figureCords[2]].match(new RegExp(player.color, 'i'))) {
-            await msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`).then(m => m.delete(2e4));
+            msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`).then(m => m.delete(2e4));
             msg.delete();
             return move(gameField, img, player);
           };
@@ -140,7 +141,7 @@ module.exports.run = async (message, args, mentionMember) => {
           const moves = getMoves(figureCords[2], gameField);
 
           if (!moves.includes(toPlace[2]) && !msg.content.match(/0/i)) {
-            await msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
+            msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
             msg.delete();
             return move(gameField, img, player);
           };
