@@ -1,6 +1,6 @@
 module.exports.info = {
   name: 'chess',
-  regex: /ch(ess)?/,
+  regex: /chess/,
   args: '[user]',
   desc: 'Chess',
   hidden: true,
