@@ -3,7 +3,6 @@ module.exports.info = {
   regex: /ch(ess)?/,
   args: '[user]',
   desc: 'Chess',
-  hidden: true,
 };
 
 module.exports.run = async (message, args, mentionMember) => {
