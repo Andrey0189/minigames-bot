@@ -321,7 +321,7 @@ class Bot {
                 field: 'https://cdn.discordapp.com/attachments/524159437464797184/527395245386629121/chessField.png',
                 blackSquare: 'https://cdn.discordapp.com/attachments/524159437464797184/527417268842397716/blackSquare.png',
                 whiteSquare: 'https://cdn.discordapp.com/attachments/524159437464797184/527417312878395410/whiteSquare.png',
-                greenSquare: 'https://cdn.discordapp.com/attachments/636186792353071114/640145858125365258/1572692874060_photo-resizer.ru.png',
+                greenSquare: 'https://cdn.discordapp.com/attachments/648115093850030091/661520878286143520/GreenSquare.png',
                 blackPawn: 'https://cdn.discordapp.com/attachments/524159437464797184/527131436382158879/blackPawn.png',
                 blackHourse: 'https://cdn.discordapp.com/attachments/524159437464797184/527131380858224641/blackHourse.png',
                 blackEleph: 'https://cdn.discordapp.com/attachments/524159437464797184/527131309282295809/blackEleph.png',
