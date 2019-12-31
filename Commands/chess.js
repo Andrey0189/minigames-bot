@@ -140,7 +140,7 @@ module.exports.run = async (message, args, mentionMember) => {
 
           const moves = getMoves(figureCords[2], gameField);
 
-          if (!moves.includes(toPlace[2]) && !msg.content.match(/0/i)) {
+          if (!moves.includes(toPlace[2]) && !msg.content.match(/0/)) {
             move(gameField, img, player);
             msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
             return msg.delete();
@@ -235,14 +235,18 @@ module.exports.run = async (message, args, mentionMember) => {
             const xSet = args[1][0].toLowerCase();
             const ySet = parseInt(args[1][1]);
 
-            const coordinats = piadap(x, y);
+            const coordinates = piadap(x, y);
             const moveCords = piadap(xSet, ySet);
 
-            img = await figurePlace(coordinats, moveCords);
-            if (img === 'checkmate') return message.channel.send(`${player.id === message.author.id? opponent : message.author} Won!`)
+            img = await figurePlace(coordinates, moveCords);
+            if (img === 'checkmate') return message.channel.send(`${player.id === message.author.id? opponent : message.author} Won!`);
 
+            const greenSquare = await Bot.jimp.read(Bot.images.chess.greenSquare);
+            const imgGreen = img.clone();
+            await imgGreen.composite(greenSquare, coordinates[0], coordinates[1]);
+            await imgGreen.composite(greenSquare, moveCords[0], moveCords[1]);
             try {
-              img.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
+              imgGreen.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
                 if (err) return move(gameField, img, otherPlayer);
                 message.channel.send(`**${msg.author.username} successfully moved \`${gameField[moveCords[2]]}\` from \`${x}${y}\` to \`${xSet}${ySet}\`\n${player.id === message.author.id? opponent : message.author}, your move.\n${standartText}**`, {files: [{ name: 'field.png', attachment: buffer }]});
                 return move(gameField, img, otherPlayer);
