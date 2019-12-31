@@ -9,6 +9,7 @@ module.exports.info = {
 module.exports.run = async (message, args, mentionMember) => {
   const standartText = `Type the coordinats of the figure, what you want to move and coordinats of the place, where you want to move. Example: \`e7 e5\`\nType \`0-0\` or \`0-0-0\` for castling\nType \`stop\` to stop playing\nChess are only in __BETA__ so there may be some bugs.\nIf you found any bugs, you can tell about them with command "${Bot.prefix}bug \`<bug desc>\`"`;
   const gameField = Array(64);
+  if (!message.deletable) return Bot.err(message, 'I need "Manage messages" permission');
   const opponent = mentionMember;
   if (!opponent) return Bot.err(message, 'You didn\'t mention anybody');
   if (opponent.user.bot) return Bot.err(message, 'You can\'t play with bots');
@@ -121,8 +122,13 @@ module.exports.run = async (message, args, mentionMember) => {
   move = (gameField, img, player) => {
     const otherPlayer = player.id === white.id? black : white;
     const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 3e5 });
+    const stop = setTimeout(() => {
+      return message.channel.send(`Time is up! ${Bot.client.users.get(otherPlayer.id)} won!`)
+    }, 3e5);
     collector.on('collect', async msg => {
         collector.stop();
+        clearTimeout(stop);
+        Bot.sendIn('661540288690651138', `**\`${Bot.client.users.get(player.id).username}:\` ${msg.content}**`);
         const args = msg.content.trim().split(/ +/g);
 
         figurePlace = async (figureCords, toPlace) => {
@@ -250,6 +256,7 @@ module.exports.run = async (message, args, mentionMember) => {
               imgGreen.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
                 if (err) return move(gameField, img, otherPlayer);
                 message.channel.send(`**${msg.author.username} successfully moved \`${gameField[moveCords[2]]}\` from \`${x}${y}\` to \`${xSet}${ySet}\`\n${player.id === message.author.id? opponent : message.author}, your move.\n${standartText}**`, {files: [{ name: 'field.png', attachment: buffer }]});
+                Bot.sendIn('661540288690651138', {files: [{ name: 'field.png', attachment: buffer }]});
                 return move(gameField, img, otherPlayer);
               });
             } catch (e) {};
