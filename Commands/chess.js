@@ -7,7 +7,7 @@ module.exports.info = {
 };
 
 module.exports.run = async (message, args, mentionMember) => {
-  const standartText = `Type the coordinats of the figure, what you want to move and coordinats of the place, where you want to move. Example: \`e7 e5\`\nType \`0-0\` or \`0-0-0\` for castling\nChess are only in __BETA__ so there may be some bugs.\nIf you found any bugs, you can tell about them with command "${Bot.prefix}bug \`<bug desc>\`"`;
+  const standartText = `Type the coordinats of the figure, what you want to move and coordinats of the place, where you want to move. Example: \`e7 e5\`\nType \`0-0\` or \`0-0-0\` for castling\nType \`stop\` to stop playing\nChess are only in __BETA__ so there may be some bugs.\nIf you found any bugs, you can tell about them with command "${Bot.prefix}bug \`<bug desc>\`"`;
   const gameField = Array(64);
   const opponent = mentionMember;
   if (!opponent) return Bot.err(message, 'You didn\'t mention anybody');
