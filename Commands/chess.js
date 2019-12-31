@@ -11,6 +11,7 @@ module.exports.run = async (message, args, mentionMember) => {
   const gameField = Array(64);
   const opponent = mentionMember;
   if (!opponent) return Bot.err(message, 'You didn\'t mention anybody');
+  if (opponent.user.bot) return Bot.err(message, 'You can\'t play with bots');
 
   const white = {
     id: message.author.id,
