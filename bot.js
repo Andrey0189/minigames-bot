@@ -107,19 +107,19 @@ class Bot {
         });
 
         _this.onMessage = async (message) => {
-            _this.msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
+            const msgPrefix = await _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
 
             if (!message.guild || message.author.bot) return;
             _this.mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
             //something
-            if (!_this.msgPrefix) return;
+            if (!msgPrefix) return;
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
               id: message.author.id,
               coins: 0,
               raiting: 0
             });
 
-            const args = message.content.slice(_this.msgPrefix.length).trim().split(/ +/g);
+            const args = message.content.slice(msgPrefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
             const mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
 
