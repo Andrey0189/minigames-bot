@@ -61,7 +61,12 @@ class Bot {
             Usage: **${cmd.name} \`${cmd.args}\`**
             Example: **${cmd.name} ${cmd.example}**`);
             message.channel.send(embed);
-        }
+        };
+      
+         this.randomBoolean = () => {
+          if (Math.random() > 0.5) return true;
+          else false;
+        };
 
         //Функция, возвращающая объект Emoji
         this.emoji = (id) => _this.client.emojis.get(id) || '';
