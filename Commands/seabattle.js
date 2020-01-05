@@ -82,9 +82,9 @@ module.exports.run = async (message, args, mentionMember) => {
             msg.channel.send('You won!');
             return otherPlr.send(`**${currentPlr.user.username} destroyed your last ship on \`${msg.content}\`! You lose >:D**`)
           };
-          await currentPlr.composite(ship, coordinates[0], coordinates[1]);
-          await currentPlr.composite(blast, coordinates[0], coordinates[1]);
-          await otherPlr.composite(blast, coordinatesNoShift[0], coordinatesNoShift[1]);
+          await currentPlr.img.composite(ship, coordinates[0], coordinates[1]);
+          await currentPlr.img.composite(blast, coordinates[0], coordinates[1]);
+          await otherPlr.img.composite(blast, coordinatesNoShift[0], coordinatesNoShift[1]);
         };
 
         msg.channel.send(`**${currRes}. Watinig for answer from ${otherPlr.user.username}...**`);
