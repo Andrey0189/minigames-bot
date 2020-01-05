@@ -3,6 +3,7 @@ module.exports.info = {
   regex: /chess/,
   args: '[user]',
   desc: 'Chess',
+  hidden: true,
 };
 
 module.exports.run = async (message, args, mentionMember) => {
@@ -147,9 +148,9 @@ module.exports.run = async (message, args, mentionMember) => {
           const moves = getMoves(figureCords[2], gameField);
 
           if (!moves.includes(toPlace[2]) && !msg.content.match(/0/)) {
-            move(gameField, img, player);
-            msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`).then(m => m.delete(2e4));
-            return msg.delete();
+            msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`);
+            msg.delete();
+            return move(gameField, img, player);
           };
 
           let figure = gameField[figureCords[2]];
@@ -207,9 +208,9 @@ module.exports.run = async (message, args, mentionMember) => {
           }
 
           if (_check && !checkmate) {
-            move(gameFieldCopy, img, player);
-            msg.reply('Your king is under attack!').then(m => m.delete(2e4));
-            return msg.delete();
+            msg.reply('Your king is under attack!');
+            msg.delete();
+            return move(gameField, img, player);
           };
 
           const blackSquare = await Bot.jimp.read(Bot.images.chess.blackSquare);
@@ -275,9 +276,9 @@ module.exports.run = async (message, args, mentionMember) => {
             if (jump > 0) for (let i = 2; i > 0; i--) if (kingDef + i in gameField) return move(gameField, img, player);
             if (jump < 0) for (let i = -3; i < 0; i++) if (kingDef + i in gameField) return move(gameField, img, player);
           } else {
-            move(gameField, img, player);
-            msg.reply('Not all conditions for castling are met').then(m => m.delete(2e4));
-            return msg.delete();
+            msg.reply('Not all conditions for castling are met');
+            msg.delete();
+            return move(gameField, img, player);
           }
 
           const kingJump = jump > 0? 2 : -2;
@@ -296,8 +297,7 @@ module.exports.run = async (message, args, mentionMember) => {
           });
         } else if (Bot.prefixes.find(p => msg.content.toLowerCase().startsWith(p)) || msg.content.toLowerCase() === 'stop') return;
         else {
-          move(gameField, img, player);
-          return msg.delete(2e4);
+          return move(gameField, img, player);
         }
     });
   };
