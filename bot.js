@@ -350,7 +350,7 @@ class Bot {
                 'mc', 'pl', 'it', 'us', 'gb', 'pt', 'tr',
                 'eg', 'in', 'au', 'nz', 'sg', 'my', 'pk',
                 'uz', 'cn', 'ua', 'de', 'fr', 'jp', 'br',
-                'bd', 'at', 'hu', 'np', 'my', 'uy', 'py',
+                'bd', 'at', 'hu', 'np', 'id', 'uy', 'py',
                 'ar', 'cl', 'cu', 'pf', 'sy', 'iq', 'ir',
                 'cz',
             ],
