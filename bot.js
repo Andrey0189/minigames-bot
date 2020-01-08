@@ -1,11 +1,9 @@
-//Подключаем библиотеки
 const Discord = require('discord.js');
 const fs = require('fs');
 const hastebin = require('hastebin-gen');
 const jimp = require('jimp');
 const mongoose = require('mongoose');
 
-//Переменные среды
 /** @namespace process.env.BOT_TOKEN */
 /** @namespace process.env.DB_LINK */
 
@@ -14,21 +12,16 @@ mongoose.connect(process.env.DB_LINK, {useNewUrlParser: true, useUnifiedTopology
   else console.log(err);
 });
 
-//Класс бота
 class Bot {
-    //Конструктор
     constructor() {
-        //Делаем this класса Bot более глобальным
         let _this = this;
-        //Подключаем боту библиотеки
         this.Discord = Discord;
         this.fs = fs;
         this.hastebin = hastebin;
         this.jimp = jimp;
         this.mongoose = mongoose;
-        //Создаем клиент бота
+
         this.client = new Discord.Client({disableEveryone: true});
-        //Регистрируем бота
         this.client.login(process.env.BOT_TOKEN).then(() => delete process.env.BOT_TOKEN);
         this.userSchema = new mongoose.Schema({
           id: String,
@@ -37,16 +30,15 @@ class Bot {
         });
 
         this.userData = mongoose.model('userData', _this.userSchema);
-        //Имя и версия бота
+
         this.unstable = false;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
         this.prefixes = _this.unstable? ['m.'] : ['m!', 'm1'];
+        this.prefix = _this.prefixes[0];
 
-        //Объект с командами
         this.commands = [];
 
         this.embed = new Discord.RichEmbed().setFooter(`<> with ❤ by ANDREY#2623`);
-        //Функция, возвращающая объект embed, стилизованный под ошибку
         this.embedErr = (message) => {
             const embed = _this.embed
             .setAuthor('Error', message.author.avatarURL)
@@ -57,24 +49,25 @@ class Bot {
         this.err = (message, reason) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
 
         this.invalidArgs = (message, cmd) => {
-            const embed = _this.embedErr(message).setDescription(`Invalid arguments were provided\n
-            Usage: **${cmd.name} \`${cmd.args}\`**
-            Example: **${cmd.name} ${cmd.example}**`);
+            const embed = _this.embedErr(message).setDescription(`**Invalid arguments were provided**\n
+            Usage: **${_this.prefix + cmd.name} \`${cmd.args}\`**
+            Example: **${_this.prefix + cmd.name} ${cmd.example}**`);
             message.channel.send(embed);
-        };
-      
-         this.randomBoolean = () => {
+        }
+
+        this.emoji = (id) => _this.client.emojis.get(id) || '';
+
+        this.random = (min, max) => Math.floor(Math.random() * (max + 1 - min)) + min;
+
+        this.randomBoolean = () => {
           if (Math.random() > 0.5) return true;
           else false;
         };
 
-        //Функция, возвращающая объект Emoji
-        this.emoji = (id) => _this.client.emojis.get(id) || '';
+        this.randomElement = (arr) => {
+          return arr[0, Math.ceil(Math.random() * arr.length - 1)]
+        };
 
-        //Функция для генерации случайного числа в определенном диапазоне
-        this.random = (min, max) => Math.floor(Math.random() * (max + 1 - min)) + min;
-
-        //Функция, отправляющая сообщение в указанный канал
         this.sendIn = (id, msg) => _this.client.channels.get(id).send(msg);
 
         this.addCommas = (int) => int.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -87,10 +80,8 @@ class Bot {
           };
         };
 
-        //Событие запуска клиента
         _this.client.on('ready', () => {
             _this.prefixes.push(`<@${this.client.user.id}>`);
-            _this.prefix = _this.prefixes[0];
             _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
             setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
@@ -282,6 +273,7 @@ class Bot {
             commandsUsing: '648114944486801408',
             serverLeaveJoin: '648114960777347087',
             reports: '648114992595599381',
+            minigamesLog: '661540288690651138'
         };
 
         this.emojis = {
