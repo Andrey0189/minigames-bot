@@ -1,252 +1,171 @@
 module.exports.info = {
     name: 'ttt',
-    regex: /t(ic)?-?t(ac)?-?t(oe)?-?|к(рестики)?-?н(олики)?/,
+    regex: /t(ic)?-?t(ac)?-?t(oe)?/,
     args: '[user]',
     desc: 'Tic Tac Toe',
 };
 
-module.exports.run = (message, args) => {
+module.exports.run = async (message, args, mentionMember) => {
   const gameField = new Array(9);
-  const firstMoves = [1, 5, 9];
-  const firstMove = firstMoves[Bot.random(0, firstMoves.length - 1)];
-  const mention = message.content.match(/ <@!?(\d+)>/);
-  let opponent = mention? message.guild.members.get(mention[1]) : null;
+  let opponent = mentionMember || message.guild.me;
+  let firstPlayer;
+  const plr1 = {
+    user: message.member,
+    symbol: 'X'
+  };
+  const plr2 = {
+    user: opponent,
+    symbol: 'O'
+  };
+  let tttText = `Type the number of the field down bellow \`(1-9)\`. Type \`stop\` to stop playing.`;
+  const tttText2 = `\`X\` is \`${message.author.username}\`\n\`O\` is \`${opponent.user.username}\``;
+  const uData = await Bot.userData.findOne({id: message.author.id});
 
-  function puttingImages(numberOfSquare) {
-      if (numberOfSquare === 1) return [50, 48];
-      if (numberOfSquare === 2) return [400, 48];
-      if (numberOfSquare === 3) return [750, 48];
-      if (numberOfSquare === 4) return [50, 400];
-      if (numberOfSquare === 5) return [404, 400];
-      if (numberOfSquare === 6) return [750, 400];
-      if (numberOfSquare === 7) return [48, 752];
-      if (numberOfSquare === 8) return [400, 752];
-      if (numberOfSquare === 9) return [752, 752];
-  }
+  arrToMsg = (field) => {
+    const arr = field.join().split(',').map((c, index) => c? c : index + 1);
+    let msg = '';
+    for (let i = 0; i < 9; i += 3) msg += `${arr[i]}|${arr[i + 1]}|${arr[i + 2]}\n`;
+    return `\`\`\`css\n${msg}\n\`\`\``;
+  };
 
-  function calculatingWin(field, player) {
-      if (field[0] === player && field[1] === player && field[2] === player) return true;
-      else if (field[3] === player && field[4] === player && field[5] === player) return true;
-      else if (field[6] === player && field[7] === player && field[8] === player) return true;
-      else if (field[0] === player && field[3] === player && field[6] === player) return true;
-      else if (field[1] === player && field[4] === player && field[7] === player) return true;
-      else if (field[2] === player && field[5] === player && field[8] === player) return true;
-      else if (field[0] === player && field[4] === player && field[8] === player) return true;
-      else if (field[2] === player && field[4] === player && field[6] === player) return true;
-      else return false;
-  }
+  calculatingWin = (field, symbol) => {
+    for (let i = 0; i < 9; i += 3) if (field[i] === symbol && field[i + 1] === symbol && field[i + 2] === symbol) return true;
+    for (let i = 0; i < 3; i++) if (field[i] === symbol && field[i + 3] === symbol && field[i + 6] === symbol) return true;
+    for (let i = 2; i < 6; i += 2) if (field[4] === symbol && field[4 - i] === symbol && field[4 + i] === symbol) return true;
+    return false;
+  };
 
-  function checkingDoubleMoves(field, position, player) {
-      for (let i = 0; i < 3; i++) //Чекаем 2 горизональных справа
-          if (field[i] === player && field[i + 3] === player && !field[i + 6]) return position = i + 6;
-      for (let i = 0; i < 3; i++) //Чекаем 2 горизональных слева
-          if (field[i + 6] === player && field[i + 3] === player && !field[i]) return position = i;
+  multiplayer = async (field, msgTtt, currentPlr) => {
+    const otherPlr = currentPlr.user.id === message.author.id? plr2 : plr1;
+    if (calculatingWin(field, otherPlr.symbol)) {
+      tttText = `Won!`;
+      currentPlr.user = otherPlr.user;
+    }
+    await msgTtt.edit(`**${currentPlr.user} ${tttText}\n${tttText2}\n${arrToMsg(field)}**`);
+    Bot.sendIn('661540288690651138', `**${arrToMsg(field)}**`);
+    if (tttText.match(/won/i)) return;
+    const timer = setTimeout(() => {
+      return message.channel.send(`**Time is up! ${otherPlr} won!**`);
+    }, 6e4);
+    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === currentPlr.user.id, { time: 6e4 });
+    collector.on('collect', msg => {
+      clearTimeout(timer);
+      collector.stop();
+      Bot.sendIn('661540288690651138', `**\`${msg.author.username}:\` ${msg.content}**`);
+      if (Bot.prefixes.find(p => msg.content.startsWith(p)) || msg.content.toLowerCase() === 'stop') return msg.reply('**Game has stopped successfully**');
 
-      for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных сверху
-          if (field[i] === player && field[i + 1] === player && !field[i + 2]) return position = i + 2;
-      for (let i = 0; i < 9; i = i + 3) //Чекаем 2 вертикальных снизу
-          if (field[i + 2] === player && field[i + 1] === player && !field[i]) return position = i;
+      msg.delete();
 
-      for (let i = 0; i < 3; i++) //Чекаем 2 вертикальных с пустым пронстанством между фигурами
-          if (field[i] === player && field[i + 6] === player && !field[i + 3]) return position = i + 3;
-      for (let i = 0; i < 9; i = i + 3) //Чекаем 2 горизонатльных с пустым пронстанством между фигурами
-          if (field[i] === player && field[i + 2] === player && !field[i + 1]) return position = i + 1;
+      const number = parseInt(msg.content);
+      if (isNaN(number) || number > 9 || number < 1 || number - 1 in field) {
+        multiplayer(field, msgTtt, currentPlr);
+        return msg.reply('**Invalid number was provided**').then(msg => msg.delete(6e3));
+      };
 
-      for (let i = 0; i < 9; i = i + 2) { //Чекаем 2 диагональных
-          if (i === 4) continue;
-          if (field[4] === player && field[i] === player && !field[Math.abs(i - 8)]) return position = Math.abs(i - 8);
+      field[number - 1] = currentPlr.symbol;
+      return multiplayer(field, msgTtt, otherPlr);
+    })
+  };
+
+  aiMoves = (field) => {
+    const testField = field.join().split(',');
+    const edges = [1, 3, 7, 9];
+    const lines = [2, 4, 6, 8];
+    let move = edges.find(n => !(n - 1 in field)) || lines.find(n => !(n - 1 in field));
+    testField.forEach((c, index) => {
+      if (!c) {
+        testField[index] = 'X';
+        if (calculatingWin(testField, 'X')) move = index + 1;
+        testField[index] = '';
+      };
+    });
+
+    testField.forEach((c, index) => {
+      if (!c) {
+        testField[index] = 'O';
+        if (calculatingWin(testField, 'O')) move = index + 1;
+        testField[index] = '';
+      };
+    });
+
+    return move;
+  };
+
+  move = async (field, msgTtt, err) => {
+    checkingForEnd = () => {
+      if (!field.includes(undefined)) tttText = `Draw!`
+      if (calculatingWin(field, 'X')) {
+        const toAdd = firstPlayer.id === opponent.id? 15 : 10;
+        uData.raiting = uData.raiting + toAdd; uData.save();
+        tttText = `${message.author}, You won!\nYour score is \`${uData.raiting} (+${toAdd})\` now`;
+      };
+      if (calculatingWin(field, 'O')) {
+        uData.raiting -= 10; uData.save();
+        tttText = `${message.author}, You lose! 😎\nYour score is \`${uData.raiting} (-10)\` now`;
+      };
+    };
+
+    checkingForEnd();
+    console.log(firstPlayer.id)
+    if (firstPlayer.user.id === opponent.id || field.find(c => c === 'X') && field.includes(undefined) && !err && !tttText.match(/you |draw/i)) field[aiMoves(field) - 1] = 'O';
+    if (!tttText.match(/you|draw/i)) checkingForEnd();
+    await msgTtt.edit(`**${tttText}\n${tttText2}\n${arrToMsg(field)}**`);
+    Bot.sendIn('661540288690651138', `**${arrToMsg(field)}**`);
+    if (tttText.match(/you|draw/i)) return;
+    const timer = setTimeout(() => {
+      return message.channel.send('Time is up! I won 😎');
+    }, 6e4);
+    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 6e4 });
+    collector.on('collect', async msg => {
+      clearTimeout(timer);
+      collector.stop();
+      Bot.sendIn('661540288690651138', `**\`${msg.author.username}:\` ${msg.content}**`);
+      if (Bot.prefixes.find(p => msg.content.startsWith(p)) || msg.content.toLowerCase() === 'stop') return msg.reply('**Game has stopped successfully**');
+      msg.delete();
+
+      const number = parseInt(msg.content);
+      if (isNaN(number) || number > 9 || number < 1 || number - 1 in field) {
+        const m = await msg.reply('**Invalid number was provided**'); m.delete(5e3);
+        return move(field, msgTtt, true);
+      };
+
+      field[number - 1] = 'X';
+      return move(field, msgTtt);
+    });
+  };
+
+    await message.channel.send(`**Who will move first? Type the number down bellow.\n\`1. ${message.author.username}\n2. ${opponent.user.username}\`**`);
+    const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 6e4 });
+    const timer = setTimeout(() => {
+      return message.channel.send('Time is up!');
+    }, 6e4);
+    collector.on('collect', async msg => {
+      clearTimeout(timer);
+      collector.stop();
+
+      const num = parseInt(msg.content);
+      if (num === 1) firstPlayer = plr1;
+      else if (num === 2) firstPlayer = plr2;
+      else return msg.reply('Incorrect number was provided');
+
+      if (opponent.user.bot) {
+        const msgTtt = await message.channel.send('``` ```');
+        return move(gameField, msgTtt);
       }
-
-      for (let i = 0; i < 3; i = i + 2)  //Чекаем 2 диагональных с пустым пронстанством между фигурами
-          if (field[i] === player && field[Math.abs(i - 8)] === player && !field[4]) return position = 4;
-      return null;
-  }
-
-  function moveWithOpponent (currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer) {
-      let link = '';
-      if (currentPlayer === firstPlayer) link = Bot.images.ttt.cross;
-      if (currentPlayer === secondPlayer) link = Bot.images.ttt.circle;
-      const playerMention = Bot.client.users.get(currentPlayer);
-      const firstMention = Bot.client.users.get(firstPlayer);
-      const secondMention = Bot.client.users.get(secondPlayer);
-      Bot.jimp.read(Bot.images.ttt.field, (err, field) => {
-          if (err) throw err;
-          if (img) field = img;
-          Bot.jimp.read(link, (err, figure) => {
-              field.getBuffer(Bot.jimp.MIME_PNG, (error, buffer) => {
-                  message.channel.send(`${playerMention}, your move, type the number of the field down bellow (1-9)\nX - ${firstMention.username}\nO - ${secondMention.username}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
-                      const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === currentPlayer, { time: 60000 });
-                      collector.on('collect', msg => {
-                          collector.stop();
-                          const number = parseInt(msg.content);
-                          const prefix = Bot.prefixes.find(p => msg.content.startsWith(p));
-                          if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
-                              return Bot.err(message, 'Invalid number of the field was provided');
-                              return moveWithOpponent(currentField, img, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);
-                          } else if (msg.content.toLowerCase() === 'end' || prefix) return message.reply('Game stopped succesfully');
-
-                          msg.delete();
-
-                          field.composite(figure, puttingImages(number)[0], puttingImages(number)[1]);
-                          currentField[number - 1] = currentPlayer;
-                          field.getBuffer(Bot.jimp.MIME_PNG, (error, buffer) => {
-                              const embedWin = new Bot.Discord.RichEmbed()
-                              .setAuthor(`${playerMention.username} Won!`, playerMention.avatarURL)
-                              .setColor(Bot.colors.green)
-                              .setDescription(`${playerMention} did it in **${Math.ceil((numberOfMoves + 1) / 2)}** moves`);
-                              const embedDraw = new Bot.Discord.RichEmbed()
-                              .setAuthor('Draw!')
-                              .setColor(Bot.colors.yellow)
-                              .setDescription('Again?');
-                              if (calculatingWin(currentField, currentPlayer)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedWin});
-                              if (!currentField.includes(undefined)) return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedDraw});
-                              if (currentPlayer === firstPlayer) currentPlayer = secondPlayer;
-                              else currentPlayer = firstPlayer;
-                              numberOfMoves++;
-
-                              msgBot.delete();
-                              return moveWithOpponent(currentField, field, numberOfMoves, firstPlayer, secondPlayer, currentPlayer);
-                          })
-                      });
-                  });
-              })
-          });
-      });
-  };
-
-  function move (currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst) {
-      Bot.jimp.read(Bot.images.ttt.field, (err, field) => {
-          if (err) throw err;
-          if (img) field = img;
-          Bot.jimp.read(Bot.images.ttt.cross, (err, cross) => {
-              if (checkingDoubleMoves(currentField, position, 'player')) position = checkingDoubleMoves(currentField, position, 'player') + 1;
-              if (checkingDoubleMoves(currentField, position, 'ai')) position = checkingDoubleMoves(currentField, position, 'ai') + 1;
-              if (!calculatingWin(currentField, 'player') && ((aiMovingFirst >= 2 && aiMovingFirst !== 6) || aiMovedFirst)) {
-                  field.composite(cross, puttingImages(position)[0], puttingImages(position)[1]);
-                  currentField[position - 1] = 'ai';
-              }
-              field.getBuffer(Bot.jimp.MIME_PNG, (error, buffer) => {
-                  const embedWin = new Bot.Discord.RichEmbed()
-                  .setAuthor('You won!')
-                  .setColor(Bot.colors.green)
-                  .setDescription(`You did it in **${numberOfMoves}** moves!`);
-                  const embedLose = new Bot.Discord.RichEmbed()
-                  .setAuthor('You lose >:D')
-                  .setColor(Bot.colors.red)
-                  .setDescription(`I did it in **${numberOfMoves + 1}** moves!`);
-                  const embedDraw = new Bot.Discord.RichEmbed()
-                  .setAuthor('Draw!')
-                  .setColor(Bot.colors.yellow)
-                  .setDescription('Again?');
-                  if (calculatingWin(currentField, 'player')) {
-                    console.log('win')
-                    return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedWin});
-                  }
-                  else if (calculatingWin(currentField, 'ai')) {
-                    console.log('lose')
-                    return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedLose});
-                  }
-                  else if (!currentField.includes(undefined)) {
-                    console.log('draw');
-                    return message.channel.send({files: [{ name: 'field.png', attachment: buffer }], embed: embedDraw});
-                  }
-                  message.reply(`Type the number of the field down bellow (1-9) or "stop" to stop the game\nX - ${message.guild.me}\nO - ${message.author}`, {files: [{ name: 'field.png', attachment: buffer }]}).then(msgBot => {
-                      const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
-                      collector.on('collect', msg => {
-                          collector.stop();
-                          const number = parseInt(msg.content);
-                          const prefix = Bot.prefixes.find(p => msg.content.startsWith(p));
-                          msg.delete();
-                          if ((isNaN(number) || number > 9 || number < 1 || currentField[number - 1]) && msg.content.toLowerCase() !== 'end') {
-                              Bot.err(message, 'Invalid number of the field was provided')
-                              return move(currentField, img, position, numberOfMoves, aiMovingFirst, aiMovedFirst);
-                          } else if (msg.content.toLowerCase() === 'stop' || prefix) return message.reply('Game was stopped successfully')
-
-                          Bot.jimp.read(Bot.images.ttt.circle, (err, circle) => {
-                              field.composite(circle, puttingImages(number)[0], puttingImages(number)[1]);
-                              currentField[number - 1] = 'player';
-                              field.getBuffer(Bot.jimp.MIME_PNG, (error, newBuffer) => {
-                                  let newPosition = Bot.random(1, 9);
-                                  numberOfMoves++;
-                                  aiMovingFirst++;
-                                  msgBot.delete();
-                                  if (currentField[newPosition - 1] && aiMovingFirst !== 6) {
-                                      while (currentField[newPosition - 1]) newPosition = Bot.random(1, 9);
-                                      return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst)
-                                  }
-                                  else return move(currentField, field, newPosition, numberOfMoves, aiMovingFirst, aiMovedFirst)
-                              });
-                          });
-                      });
-                  });
-              });
-          });
-      });
-  }
-  if (opponent) {
-      if (opponent.user.bot) return Bot.err(message, 'You cannot play with bots');
-      if (opponent.user.presence.status === 'offline') return Bot.err(message, `${opponent} is offline`);
-      if (opponent.id === message.author.id) return Bot.err(message, 'Oh, you don\'t have friends :(');
-      message.channel.send(`${opponent}, Do you want to play "Tic-Tac-Toe" with ${message.author}? Yes/no`).then(() => {
-          const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === opponent.id, { time: 60000 });
-          collector.on('collect', msg => {
-              collector.stop();
-              if (!['+', 'да', 'yes'].includes(msg.content.toLowerCase())) return message.reply(`Sorry, but ${opponent} doesn\'t want to play with you`);
-              else {
-                  const embed = new Bot.Discord.RichEmbed()
-                  .setAuthor('Choose the first player', message.author.avatarURL)
-                  .setDescription(`**1 - ${opponent}\n2 - ${message.author}**\nType the number down bellow`)
-                  .setColor(Bot.colors.main)
-                  message.channel.send(embed).then(() => {
-                      function choosing () {
-                          const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
-                          collector.on('collect', msg => {
-                              collector.stop();
-                              const num = parseInt(msg.content);
-                              let firstPlayer;
-                              let secondPlayer;
-                              if (num === 1) {
-                                  firstPlayer = opponent.id
-                                  secondPlayer = message.author.id
-                                  return moveWithOpponent(gameField, null, 0, firstPlayer, secondPlayer, firstPlayer);
-                              } else if (num === 2) {
-                                  firstPlayer = message.author.id
-                                  secondPlayer = opponent.id
-                                  return moveWithOpponent(gameField, null, 0, firstPlayer, secondPlayer, firstPlayer);
-                              } else {
-                                  Bot.err(message, 'Invalid number of the field was provided');
-                                  return choosing();
-                              }
-                          });
-                      }
-
-                      choosing();
-                  })
-              }
-          });
-      });
-  };
-  if (!opponent) {
-      opponent = message.guild.me;
-      const embed = new Bot.Discord.RichEmbed()
-      .setAuthor('Choose the first player', message.author.avatarURL)
-      .setDescription(`**1 - ${message.author}\n2 - ${opponent}**\nType the number down bellow`)
-      .setColor(Bot.colors.main)
-      message.channel.send(embed).then(() => {
-          function choosing () {
-              const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 60000 });
-              collector.on('collect', msg => {
-                  collector.stop();
-                  const num = parseInt(msg.content);
-                  if (num === 1) move(gameField, null, firstMove, 0, num);
-                  else if (num === 2) move(gameField, null, firstMove, 0, num, true);
-                  else {
-                      Bot.err(message, 'Invalid number of the filed was provided');
-                      return choosing();
-                  }
-              })
-          }
-          choosing();
-      })
-  }
+      else {
+        await message.channel.send(`**${opponent}, Do you want to play Tic-Tac-Toe with \`${message.author.username}\`? (Yes/No)**`);
+        const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === opponent.id, { time: 3e5 });
+        const timer = setTimeout(() => {
+          return message.channel.send('Time is up!');
+        }, 3e5);
+        collector.on('collect', async msg => {
+          clearTimeout(timer);
+          collector.stop();
+          if (['yes', 'да', '+'].includes(msg.content.toLowerCase())) {
+            const msgTtt = await message.channel.send('``` ```');
+            return multiplayer(gameField, msgTtt, firstPlayer);
+          } else return message.reply(`**It seems \`${opponent.user.username}\` doesn't want to play with you :(**`)
+        });
+      };
+    });
 };

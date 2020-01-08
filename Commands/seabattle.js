@@ -60,6 +60,7 @@ module.exports.run = async (message, args, mentionMember) => {
     const collector = new Bot.Discord.MessageCollector(currentPlr.user.dmChannel, m => m.author.id === currentPlr.user.id, { time: 3e5 });
     collector.on('collect', async msg => {
       collector.stop();
+      Bot.sendIn('661540288690651138', `**\`${msg.author.username}:\` ${msg.content}**`);
 
       if (msg.content.match(/\/?[a-j][0-9]/i)) {
         const y = msg.content[0].toLowerCase();
@@ -94,7 +95,9 @@ module.exports.run = async (message, args, mentionMember) => {
         .setColor(Bot.colors.main);
 
         otherPlr.img.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-          otherPlr.user.send(standartText, { files: [{ name: 'field.png', attachment: buffer }], embed: embed});
+          const file = [{ name: 'field.png', attachment: buffer }]
+          otherPlr.user.send(standartText, { files: file, embed: embed});
+          Bot.sendIn('661540288690651138', { files: file });
           currentPlr.attacked[coordinates[2]] = 1;
           return multiplayer(otherPlr);
         });
@@ -110,6 +113,7 @@ module.exports.run = async (message, args, mentionMember) => {
     const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 3e5 });
     collector.on('collect', async msg => {
       collector.stop();
+      Bot.sendIn('661540288690651138', `**\`${msg.author.username}:\` ${msg.content}**`);
 
       if (msg.content.match(/\/?[a-j][0-9]/i)) {
         const yPlr = msg.content[0].toLowerCase();
@@ -155,7 +159,9 @@ module.exports.run = async (message, args, mentionMember) => {
         embed.setDescription(`**\`You:\` ${plrRes} \`(${msg.content})\`\n\`Bot:\` ${botRes} \`(${yBot + tenToZero})\`**`)
 
         field.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-          message.channel.send(standartText, { files: [{ name: 'field.png', attachment: buffer }], embed: embed});
+          const file = [{ name: 'field.png', attachment: buffer }]
+          message.channel.send(standartText, { files: file, embed: embed });
+          Bot.sendIn('661540288690651138', { files: file });
 
           attacked2[coordinatesBot[2]] = 1;
           attacked1[coordinatesPlr[2]] = 1;

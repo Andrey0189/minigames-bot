@@ -140,16 +140,14 @@ module.exports.run = async (message, args, mentionMember) => {
           to[1]++;
 
           if (!gameField[figureCords[2]] || !gameField[figureCords[2]].match(new RegExp(player.color, 'i'))) {
-            move(gameField, img, player);
-            msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`).then(m => m.delete(2e4));
-            return msg.delete();
+            msg.reply(`This isn't your figure or there are no figure on ${from[0]}${from[1]}`);
+            return move(gameField, img, player);
           };
 
           const moves = getMoves(figureCords[2], gameField);
 
           if (!moves.includes(toPlace[2]) && !msg.content.match(/0/)) {
             msg.reply(`You can't move the ${gameField[figureCords[2]]} from ${from[0]}${from[1]} to ${to[0]}${to[1]}`);
-            msg.delete();
             return move(gameField, img, player);
           };
 
@@ -209,7 +207,6 @@ module.exports.run = async (message, args, mentionMember) => {
 
           if (_check && !checkmate) {
             msg.reply('Your king is under attack!');
-            msg.delete();
             return move(gameField, img, player);
           };
 
@@ -254,7 +251,7 @@ module.exports.run = async (message, args, mentionMember) => {
             await imgGreen.composite(greenSquare, moveCords[0], moveCords[1]);
             try {
               imgGreen.getBuffer(Bot.jimp.MIME_PNG, (err, buffer) => {
-                if (err) return move(gameField, img, otherPlayer);
+                if (err) console.log(err);
                 message.channel.send(`**${msg.author.username} successfully moved \`${gameField[moveCords[2]]}\` from \`${x}${y}\` to \`${xSet}${ySet}\`\n${player.id === message.author.id? opponent : message.author}, your move.\n${standartText}**`, {files: [{ name: 'field.png', attachment: buffer }]});
                 Bot.sendIn('661540288690651138', {files: [{ name: 'field.png', attachment: buffer }]});
                 return move(gameField, img, otherPlayer);
@@ -277,7 +274,6 @@ module.exports.run = async (message, args, mentionMember) => {
             if (jump < 0) for (let i = -3; i < 0; i++) if (kingDef + i in gameField) return move(gameField, img, player);
           } else {
             msg.reply('Not all conditions for castling are met');
-            msg.delete();
             return move(gameField, img, player);
           }
 
@@ -295,10 +291,8 @@ module.exports.run = async (message, args, mentionMember) => {
             message.channel.send(`**${msg.author.username} was successfully castled.\n${player.id === message.author.id? opponent : message.author}, your move.\nType \`0-0\` or \`0-0-0\` for castling btw**`, {files: [{ name: 'field.png', attachment: buffer }]});
             return move(gameField, img, otherPlayer);
           });
-        } else if (Bot.prefixes.find(p => msg.content.toLowerCase().startsWith(p)) || msg.content.toLowerCase() === 'stop') return;
-        else {
-          return move(gameField, img, player);
-        }
+        } else if (Bot.prefixes.find(p => msg.content.toLowerCase().startsWith(p)) || msg.content.toLowerCase() === 'stop') return msg.reply('Game has successfully stopped');
+        else return move(gameField, img, player);
     });
   };
 
