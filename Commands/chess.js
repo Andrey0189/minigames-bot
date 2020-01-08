@@ -243,7 +243,7 @@ module.exports.run = async (message, args, mentionMember) => {
             const moveCords = piadap(xSet, ySet);
 
             img = await figurePlace(coordinates, moveCords);
-            if (img === 'checkmate') return message.channel.send(`${player.id === message.author.id? opponent : message.author} Won!`);
+            if (img === 'checkmate') return message.channel.send(`${player.id === message.author.id? message.author : opponent} Won!`);
 
             const greenSquare = await Bot.jimp.read(Bot.images.chess.greenSquare);
             const imgGreen = img.clone();
