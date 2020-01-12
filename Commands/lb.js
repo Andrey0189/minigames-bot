@@ -2,7 +2,7 @@ module.exports.info = {
   name: 'top',
   regex: /l(eader)?b(oard?)|top/,
   desc: 'Best players',
-  args: '[minigames | coins]',
+  args: '<minigames | coins>',
   example: 'coins'
 };
 
@@ -31,7 +31,8 @@ module.exports.run = async (message, args) => {
       if (index + 1 <= page * maxElements && index + 1 > (page - 1) * maxElements) arr.push(`\`${index + 1}. ${usr}:${('.').repeat(50 - usr.length)}${sdjgfgd(u.raiting, u.coins)}\``)
     });
 
-    return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on Feb 1\n\n') + arr.join('\n')}**`);
+    const top = arr.join('\n').replace(/`/g, '\`');
+    return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on Jan 1\n\n') + top}**`);
   };
 
   message.channel.send(book(page)).then(msg => {
