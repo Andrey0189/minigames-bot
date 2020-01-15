@@ -6,6 +6,7 @@ module.exports.info = {
 };
 
 module.exports.run = async (message, args, mentionMember) => {
+  if (message.author.id === '614666763191189511') return message.reply('dude please stop abusing the bot');
   const gameField = new Array(9);
   let opponent = mentionMember || message.guild.me;
   let firstPlayer;
