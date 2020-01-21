@@ -95,6 +95,7 @@ class Bot {
         });
 
         _this.onMessage = async (message) => {
+            console.log('test')
             const msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
 
             if (!message.guild || message.author.bot) return;
