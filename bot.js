@@ -96,9 +96,9 @@ class Bot {
 
         _this.onMessage = async (message) => {
             const msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
-            console.log('1')
             if (!message.guild || message.author.bot) return;
-            console.log('2') //something
+            //something
+            console.log(msgPrefix)
             if (!msgPrefix) return;
             console.log(msg.content)
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
