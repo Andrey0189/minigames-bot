@@ -39,7 +39,7 @@ class Bot {
         this.userData = mongoose.model('userData', _this.userSchema);
         this.shipData = mongoose.model('ship', _this.shipSchema);
 
-        this.unstable = true;
+        this.unstable = false;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
         this.prefixes = _this.unstable? ['m.'] : ['m!', 'm1'];
         this.prefix = _this.prefixes[0];
@@ -98,9 +98,8 @@ class Bot {
             const msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
             if (!message.guild || message.author.bot) return;
             //something
-            console.log(msgPrefix)
             if (!msgPrefix) return;
-            console.log(msg.content)
+
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
               id: message.author.id,
               coins: 0,
