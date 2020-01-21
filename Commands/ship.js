@@ -24,7 +24,6 @@ module.exports = {
     .setTitle('❤️ MATCHMAKING ❤️')
     .setColor('ff00b0')
     .setDescription(`▼***${args[0]}***\n▲***${args[1]}***\n\n💞 **${percents}%** [${segments + '□'.repeat(10 - segments.length)}]\n\n**${loveText}**`)
-    .setFooter(Bot.randomElement(Bot.randomPhrases))
     .setTimestamp();
     message.channel.send({embed});
   },  
