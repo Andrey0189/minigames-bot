@@ -1,19 +1,19 @@
-module.exports.info = {
+module.exports = {
   name: 'countries',
   regex: /countr(ies|y)|стран[ыа]/,
+  args: ['[easy | medium | hard]'],
   desc: 'Guess flag of the country',
-  args: '[easy | normal | hard]',
-  example: 'hard'
+  example: 'https://media.discordapp.net/attachments/648115093850030091/668503522240626708/countriesEx.gif',
+  argsCheck: async () => 0,
+  run: (message, args) => {
+    //message, variants, answers, minigameName, difficulty, question, score, seconds, placingAlgoritm
+    Bot.chooseVariantsCmd(message,
+      Bot.minigames.countries,
+      Bot.minigames.flags.map(f => `:flag_${f}:`),
+      module.exports.desc,
+      args.join(' '),
+      variant => `What flag does **${variant}** have`,
+      5, 10,
+      answers => answers[Bot.random(0, answers.length - 1)]);
+  }  
 };
-
-module.exports.run = (message, args) => {
-  //message, variants, answers, minigameName, difficulty, question, score, seconds, placingAlgoritm
-  Bot.chooseVariantsCmd(message,
-    Bot.minigames.countries,
-    Bot.minigames.flags.map(f => `:flag_${f}:`),
-    module.exports.info.desc,
-    args.join(' '),
-    variant => `What flag does **${variant}** have`,
-    5, 10,
-    answers => answers[Bot.random(0, answers.length - 1)]);
-}
