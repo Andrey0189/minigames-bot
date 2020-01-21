@@ -15,6 +15,7 @@ mongoose.connect(process.env.DB_LINK, {useNewUrlParser: true, useUnifiedTopology
 class Bot {
     constructor() {
         let _this = this;
+
         this.Discord = Discord;
         this.fs = fs;
         this.hastebin = hastebin;
@@ -29,44 +30,34 @@ class Bot {
           raiting: Number
         });
 
-        this.userData = mongoose.model('userData', _this.userSchema);
+        this.shipSchema = new mongoose.Schema({
+            lover1: String,
+            lover2: String,
+            percents: Number,
+          });
 
-        this.unstable = false;
+        this.userData = mongoose.model('userData', _this.userSchema);
+        this.shipData = mongoose.model('ship', _this.shipSchema);
+
+        this.unstable = true;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
         this.prefixes = _this.unstable? ['m.'] : ['m!', 'm1'];
         this.prefix = _this.prefixes[0];
 
+        this.creator = 'ANDREY#2623';
+        this.topgg = 'https://top.gg/bot/522731595858313217';
+        this.github = 'https://github.com/Andrey0189/minigames-bot';
+        this.server = 'https://discord.gg/6XBBMDU';
+
         this.commands = [];
-
-        this.embed = new Discord.RichEmbed().setFooter(`<> with ❤ by ANDREY#2623`);
-        this.embedErr = (message) => {
-            const embed = _this.embed
-            .setAuthor('Error', message.author.avatarURL)
-            .setColor('ff5555')
-            return embed;
-        };
-
-        this.err = (message, reason) => message.channel.send(_this.embedErr(message).setDescription(`Reason: **${reason}**`));
-
-        this.invalidArgs = (message, cmd) => {
-            const embed = _this.embedErr(message).setDescription(`**Invalid arguments were provided**\n
-            Usage: **${_this.prefix + cmd.name} \`${cmd.args}\`**
-            Example: **${_this.prefix + cmd.name} ${cmd.example}**`);
-            message.channel.send(embed);
-        }
 
         this.emoji = (id) => _this.client.emojis.get(id) || '';
 
         this.random = (min, max) => Math.floor(Math.random() * (max + 1 - min)) + min;
 
-        this.randomBoolean = () => {
-          if (Math.random() > 0.5) return true;
-          else false;
-        };
+        this.randomBoolean = () => Math.random() > 0.5? true : false;
 
-        this.randomElement = (arr) => {
-          return arr[0, Math.ceil(Math.random() * arr.length - 1)]
-        };
+        this.randomElement = arr => arr[Math.ceil(Math.random() * arr.length - 1)];
 
         this.sendIn = (id, msg) => _this.client.channels.get(id).send(msg);
 
@@ -75,38 +66,38 @@ class Bot {
         this.toMoscowTime = (time) => time.toLocaleString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false}).replace(/\/|\./g, '-');
 
         this.multipleReact = async (message, arr) => {
-          if (0 in arr) {
-            await message.react(arr.shift()).then(() => _this.multipleReact(message, arr).catch());
-          };
+          if (0 in arr) await message.react(arr.shift()).then(() => _this.multipleReact(message, arr).catch());
         };
 
         _this.client.on('ready', () => {
             _this.prefixes.push(`<@${this.client.user.id}>`);
             _this.creatorTag = _this.client.users.get(_this.creatorID).tag;
-            setInterval(() => _this.client.user.setActivity(`${_this.prefixes[0]}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
+            setInterval(() => _this.client.user.setActivity(`${_this.prefix}help | ${_this.client.guilds.size} servers`, {type: 'PLAYING'}), 12e4);
+            _this.client.user.setStatus('idle');
             console.log(`${this.client.user.tag} is Logged successfully.\nGuilds: ${this.client.guilds.size}\nUsers: ${this.client.users.size}\nChannels: ${this.client.channels.size}`);
             fs.readdir('./Commands', (err, cmds) => {
                 if (err) throw err;
                 cmds.forEach(command => {
                     const cmd = require(`./Commands/${command}`);
                     this.commands.push({
-                        name: cmd.info.name,
-                        regex: cmd.info.regex.toString().slice(1, -1),
-                        args: cmd.info.args,
-                        desc: cmd.info.desc,
-                        run: cmd.run,
-                        private: cmd.info.private || false,
-                        hidden: cmd.info.hidden || false,
+                        name: cmd.name,
+                        regex: cmd.regex,
+                        args: cmd.args,
+                        desc: cmd.desc,
+                        example: cmd.example,
+                        private: cmd.private || false,
+                        hidden: cmd.hidden || false,
+                        argsCheck: cmd.argsCheck,
+                        run: cmd.run
                     });
                 });
             });
         });
 
         _this.onMessage = async (message) => {
-            const msgPrefix = await _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
+            const msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
 
             if (!message.guild || message.author.bot) return;
-            _this.mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
             //something
             if (!msgPrefix) return;
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
@@ -117,11 +108,18 @@ class Bot {
 
             const args = message.content.slice(msgPrefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
-            const mentionMember = message.mentions.members.find(m => m.id !== _this.client.user.id);
+            const mentionMember = message.mentions.members.find(u => u.id !== _this.client.user.id) || message.guild.members.get(args[0]) || (args[0]? message.guild.members.find(m => m.user.tag.match(new RegExp(args[0], 'i'))) : null);
+            const user = message.mentions.users.find(u => u.id !== _this.client.user.id) || _this.client.users.get(args[0]) || (args[0]? _this.client.users.find(u => u.tag.match(new RegExp(args[0], 'i'))) : null);
 
-            const cmd = _this.commands.find(c => command.match(new RegExp(c.regex)));
+            const cmd = _this.commands.find(c => command.match(c.regex));
             if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
-                await cmd.run(message, args, mentionMember);
+                for (let i = 0; cmd.args? i < cmd.args.length : false; i++) {
+                    let type = cmd.args[i].slice(-1) === ']'? 'optional' : 'required';
+                    if (!(i in args) && type === 'required') return _this.invalidArgs(message, cmd, 'Missing Argument')
+                };
+                
+                if (cmd.args && await cmd.argsCheck(message, args, mentionMember) === 1) return;
+                await cmd.run(message, args, mentionMember, user);
                 const mentionReg = /<@!?(\d+)?>/g;
                 const mentions = message.content.match(mentionReg);
                 let content = message.content;
@@ -136,21 +134,31 @@ class Bot {
             };
 
             if (command === 'help') {
-                const page = parseInt(args[0]) || 1;
-                const helpCommands = _this.commands.filter(c => !c.private && !c.hidden)
-                const arr = helpCommands.map(cmd => `◽ **${_this.prefix + cmd.name} ${cmd.args?`\`${cmd.args}\``:''} -** ${cmd.desc}`);
-                const embed = new Discord.RichEmbed()
-                .setAuthor('Help', message.author.avatarURL)
-                .setDescription(`**\`<...>\` - Required parameter.\n\`[...]\` - Optional parameter.\n\`&\` - AND operator.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
-                .setColor(_this.colors.main)
-                .addField('More info', `**:link: Official server: ${_this.serverLink}\n:tools: Fork me on GitHub https://github.com/Andrey0189/minigames-bot\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - __alekseyvarnavskiy84@gmail.com__\n◽ Type ${_this.prefixes[0]}donate for more info**`)
-                .setFooter(`<> with ❤ by ${_this.creatorTag}`)
-                message.channel.send(embed);
+                if (!args[0]) {
+                    const helpCommands = _this.commands.filter(c => !c.private && !c.hidden)
+                    const arr = helpCommands.map(cmd => `◽ **${_this.prefix + cmd.name} ${cmd.args?`\`${cmd.args.join(' ')}\``:''} -** ${cmd.desc}`);
+                    const embed = new Discord.RichEmbed()
+                    .setAuthor('Help', message.author.avatarURL)
+                    .setDescription(`**Type ${_this.prefix}help \`<command-name>\` for more help about any command\n\`<...>\` - Required parameter.\n\`[...]\` - Optional parameter.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
+                    .setColor(_this.colors.main)
+                    .addField('More info', `**🆙 Vote for me: ${_this.topgg}\n:link: Official server: ${_this.server}\n:tools: Fork me on GitHub ${_this.github}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - __alekseyvarnavskiy84@gmail.com__\n◽ Type ${_this.prefixes[0]}donate for more info**`)
+                    .setFooter(`<> with ❤ by ${_this.creatorTag}`)
+                    message.channel.send(embed);
+                } else {
+                    const argCmd = args[0];
+                    const helpCmd = _this.commands.find(c => argCmd.match(c.regex));
+                    if (!helpCmd) return _this.err(message, 'Invalid command was provided.');
+                    const embed = new Discord.RichEmbed()
+                    .addField(`Command ${_this.prefix + helpCmd.name}`, helpCmd.desc + (helpCmd.example? '. GIF example of using:' : ''))
+                    .setImage(helpCmd.example)
+                    .setColor(_this.colors.main);
+                    message.channel.send(embed);
+                };
             }
         };
-
+        
         _this.client.on('message', async msg => _this.onMessage(msg));
-        _this.client.on('messageUpdate', async (oldMsg, msg) => _this.onMessage(msg));
+        _this.client.on('messageUpdate', async (_oldMsg, msg) => _this.onMessage(msg));
 
         _this.client.on('guildCreate', (guild) => {
             const embed = new Discord.RichEmbed()
@@ -164,8 +172,8 @@ class Bot {
             .setThumbnail(guild.iconURL)
             .setFooter(`Now we have ${_this.client.guilds.size} servers`)
             if (!_this.unstable) _this.sendIn(_this.channels.serverLeaveJoin, embed);
-            let channels = guild.channels.filter(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
-            if (channels.size > 0) channels.first().send(`Thank you for ading me! Type ${this.prefixes[0]}help for help! ${_this.serverLink}`);
+            const channel = guild.channels.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
+            if (channel) channel.send(`Thank you for inviting me! Type ${this.prefixes[0]}help for help!\nJoin our official server if you having some troubles or want to find some freinds: ${_this.server}\nFork me on GitHub: <${_this.github}>\nVote for me: <${_this.topgg}>`);
         });
 
         this.client.on('guildDelete', (guild) => {
@@ -187,10 +195,8 @@ class Bot {
         * Costants
         */
 
-        this.serverLink = 'https://discord.gg/6XBBMDU';
-
         this.colors = {
-            discord: '36393F',
+            discord: '36393f',
             green: '55ff55',
             red: 'ff5555',
             yellow: 'ffff55',
@@ -268,6 +274,32 @@ class Bot {
         this.helperID = '421030089732653057';
         this.avatarCreatorID = '453531199894323201';
         this.evalWhitelist = [this.creatorID, this.helperID];
+
+        this.randomPhrases = [`<> with ❤ by ${_this.creator}`, 
+        'Vote for Minigames Bot!\nhttps://top.gg/bot/522731595858313217',
+        `Enjoying Minigames Bot?\nYou can help us by donating! Type ${_this.prefix}donate`,
+        'Having troubles or want to\nfind some friends to play\nMinigames Bot? Join our official\nserver! https://discord.gg/6XBBMDU',
+        'Are you JavaScript developer?\nFork me on GitHub!\nhttps://github.com/Andrey0189/minigames-bot',
+        `Tell us about bugs with ${_this.prefix}bug command.\nOr about your ideas with ${_this.prefix}idea command`];
+
+        this.err = (message, reason) => {
+            const embed = new Discord.RichEmbed()
+            .setAuthor('Error', message.author.avatarURL)
+            .setColor('ff5555')
+            .setFooter(_this.randomElement(_this.randomPhrases))
+            .setDescription(`Reason: **${reason}**`);
+            message.channel.send(embed);
+        };
+
+        this.invalidArgs = (message, cmd, reason) => {
+            const embed = new Discord.RichEmbed()
+            .setAuthor('Error', message.author.avatarURL)
+            .setColor('ff5555')
+            .setDescription(`**${reason}**\n\nUsage: **${_this.prefix + cmd.name} \`${cmd.args.join(' ')}\`\n**Example:`)
+            .setImage(cmd.example)
+            .setFooter(_this.randomElement(_this.randomPhrases));
+            message.channel.send(embed);
+        }
 
         this.channels = {
             commandsUsing: '648114944486801408',
