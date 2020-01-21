@@ -39,7 +39,7 @@ class Bot {
         this.userData = mongoose.model('userData', _this.userSchema);
         this.shipData = mongoose.model('ship', _this.shipSchema);
 
-        this.unstable = false;
+        this.unstable = true;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
         this.prefixes = _this.unstable? ['m.'] : ['m!', 'm1'];
         this.prefix = _this.prefixes[0];
@@ -50,6 +50,8 @@ class Bot {
         this.server = 'https://discord.gg/6XBBMDU';
 
         this.commands = [];
+
+        RegExp.quote = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 
         this.emoji = (id) => _this.client.emojis.get(id) || '';
 
@@ -96,10 +98,10 @@ class Bot {
 
         _this.onMessage = async (message) => {
             const msgPrefix = _this.prefixes.find(p => message.content.toLowerCase().startsWith(p));
+
             if (!message.guild || message.author.bot) return;
             //something
             if (!msgPrefix) return;
-
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
               id: message.author.id,
               coins: 0,
@@ -108,8 +110,8 @@ class Bot {
 
             const args = message.content.slice(msgPrefix.length).trim().split(/ +/g);
             const command = args.shift().toLowerCase();
-            const mentionMember = message.mentions.members.find(u => u.id !== _this.client.user.id) || message.guild.members.get(args[0]) || (args[0]? message.guild.members.find(m => m.user.tag.match(new RegExp(args[0], 'i'))) : null);
-            const user = message.mentions.users.find(u => u.id !== _this.client.user.id) || _this.client.users.get(args[0]) || (args[0]? _this.client.users.find(u => u.tag.match(new RegExp(args[0], 'i'))) : null);
+            const mentionMember = message.mentions.members.find(u => u.id !== _this.client.user.id) || message.guild.members.get(args[0]) || (args[0]? message.guild.members.find(m => m.user.tag.match(new RegExp(RegExp.quote(args[0]), 'i'))) : null);
+            const user = message.mentions.users.find(u => u.id !== _this.client.user.id) || _this.client.users.get(args[0]) || (args[0]? _this.client.users.find(u => u.tag.match(new RegExp(RegExp.quote(args[0]), 'i'))) : null);
 
             const cmd = _this.commands.find(c => command.match(c.regex));
             if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
