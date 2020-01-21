@@ -39,7 +39,7 @@ class Bot {
         this.userData = mongoose.model('userData', _this.userSchema);
         this.shipData = mongoose.model('ship', _this.shipSchema);
 
-        this.unstable = true;
+        this.unstable = false;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
         this.prefixes = _this.unstable? ['m.'] : ['m!', 'm1'];
         this.prefix = _this.prefixes[0];
