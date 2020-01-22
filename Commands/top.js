@@ -35,7 +35,7 @@ module.exports = {
       });
   
       const top = arr.join('\n');
-      return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on Jan 1\n\n') + top}**`);
+      return embed.setDescription(`**${((args[0] === 'coins')? 'You can get coins after reset in other leaderboards!\n\n' : 'Next reset on Feb 1\n\n') + top}**`);
     };
   
     message.channel.send(book(page)).then(msg => {
