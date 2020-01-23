@@ -113,7 +113,10 @@ class Bot {
             const mentionMember = message.mentions.members.find(u => u.id !== _this.client.user.id) || message.guild.members.get(args[0]) || (args[0]? message.guild.members.find(m => m.user.tag.match(new RegExp(RegExp.quote(args[0]), 'i'))) : null);
             const user = message.mentions.users.find(u => u.id !== _this.client.user.id) || _this.client.users.get(args[0]) || (args[0]? _this.client.users.find(u => u.tag.match(new RegExp(RegExp.quote(args[0]), 'i'))) : null);
 
-            const cmd = _this.commands.find(c => command.match(c.regex));
+            const cmd = _this.commands.find(c => command.match(new RegExp(`^${c.regex.toString().slice(1, -1)}$`)));
+            const cmdCheck = _this.commands.find(c => command.match(c.regex));
+            
+            if (!cmd && cmdCheck) message.reply(`**Maybe you mean ${_this.prefix + command.match(cmdCheck.regex)}?**`)
             if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
                 for (let i = 0; cmd.args? i < cmd.args.length : false; i++) {
                     let type = cmd.args[i].slice(-1) === ']'? 'optional' : 'required';
