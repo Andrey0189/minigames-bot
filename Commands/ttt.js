@@ -4,6 +4,7 @@ module.exports = {
     args: ['[user]'],
     desc: 'Tic Tac Toe',
     example: 'https://media.discordapp.net/attachments/648115093850030091/668503609482149918/tttEx.gif',
+    auto: true,
     argsCheck: async (message, args, mentionMember) => {
       let opponent = mentionMember || message.guild.me;
       if (opponent.id === message.author.id || (mentionMember && mentionMember.user.bot)) {
@@ -50,7 +51,7 @@ module.exports = {
         }
         await msgTtt.edit(`**${currentPlr.user} ${tttText}\n${tttText2}\n${arrToMsg(field)}**`);
         Bot.sendIn('661540288690651138', `**${arrToMsg(field)}**`);
-        if (tttText.match(/won/i)) return;
+        if (tttText.match(/won/i)) return Bot.autoCheck(module.exports, message, args, mentionMember);
         const timer = setTimeout(() => {
           return message.channel.send(`**Time is up! ${otherPlr} won!**`);
         }, 6e4);
@@ -78,9 +79,7 @@ module.exports = {
         const testField = field.join().split(',');
         const edges = [1, 3, 7, 9];
         const lines = [2, 4, 6, 8];
-        console.log(Bot.randomElement(edges.filter(n => !(n - 1 in field))))
         let move = Bot.randomElement(edges.filter(n => !(n - 1 in field))) || Bot.randomElement(lines.filter(n => !(n - 1 in field))) 
-        console.log(move)
         testField.forEach((c, index) => {
           if (!c) {
             testField[index] = 'X';
@@ -120,7 +119,7 @@ module.exports = {
         if (!tttText.match(/you|draw/i)) checkingForEnd();
         await msgTtt.edit(`**${tttText}\n${tttText2}\n${arrToMsg(field)}**`);
         Bot.sendIn('661540288690651138', `**${arrToMsg(field)}**`);
-        if (tttText.match(/you|draw/i)) return;
+        if (tttText.match(/you|draw/i)) return Bot.autoCheck(module.exports, message, args, mentionMember);;
         const timer = setTimeout(() => {
           return message.channel.send('Time is up! I won 😎');
         }, 6e4);
