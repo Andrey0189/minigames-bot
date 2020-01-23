@@ -56,6 +56,7 @@ module.exports = {
         }, 6e4);
         const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === currentPlr.user.id, { time: 6e4 });
         collector.on('collect', async msg => {
+          clearTimeout(timer);
           await collector.stop();
           Bot.sendIn('661540288690651138', `**\`${msg.author.username}:\` ${msg.content}**`);
           if (Bot.prefixes.find(p => msg.content.startsWith(p)) || msg.content.toLowerCase() === 'stop') return msg.reply('**Game has stopped successfully**');
