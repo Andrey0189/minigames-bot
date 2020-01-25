@@ -54,14 +54,57 @@ module.exports = {
     const figures = ['White pawn', 'White knight', 'White bishop', 'White rook', 'White queen', 'White king',
       'Black pawn', 'Black knight', 'Black bishop', 'Black rook', 'Black queen', 'Black king'];
   
-    const figuresEmojis = [Bot.emojis.whitePawn, Bot.emojis.whiteHourse, Bot.emojis.whiteEleph, Bot.emojis.whiteLadya, Bot.emojis.whiteFerz, Bot.emojis.whiteKing,
-      Bot.emojis.blackPawn, Bot.emojis.blackHourse, Bot.emojis.blackEleph, Bot.emojis.blackLadya, Bot.emojis.blackFerz, Bot.emojis.blackKing];
-  
     const figuresImgs = [Bot.images.chess.whitePawn, Bot.images.chess.whiteHourse, Bot.images.chess.whiteEleph, Bot.images.chess.whiteLadya, Bot.images.chess.whiteFerz, Bot.images.chess.whiteKing,
       Bot.images.chess.blackPawn, Bot.images.chess.blackHourse, Bot.images.chess.blackEleph, Bot.images.chess.blackLadya, Bot.images.chess.blackFerz, Bot.images.chess.blackKing];
   
-    figuresToEmojis = (figure) => {
-      for (let i = 0; i < figures.length; i++) if (figure = figures[i]) return figuresEmojis[i];
+    debug = (field) => {
+      const fieldLog = field.join().split(',').map((c, i) => {
+      let figure;
+      switch (c) {
+        case 'White pawn':
+          figure = '♙';
+          break;
+        case 'White knight':
+          figure = '♘';
+          break;
+        case 'White bishop':
+          figure = '♗';
+          break;
+        case 'White rook':
+          figure = '♖';
+          break;
+        case 'White queen':
+          figure = '♕';
+          break;
+        case 'White king' || 'White king+':
+          figure = '♔';
+          break;
+        case 'Black pawn':
+          figure = '♟';
+          break;
+        case 'Black knight':
+          figure = '♞';
+          break;
+        case 'Black bishop':
+          figure = '♝';
+          break;
+        case 'Black rook':
+          figure = '♜';
+          break;
+        case 'Black queen':
+          figure = '♛';
+          break;
+        case 'Black king' || 'Black king+':
+          figure = '♚';
+          break;
+        default: 
+          figure = ' ';
+      };
+      
+      return `${((i % 8 === 0)? i / 8 + 1 : '') + figure + ((((i + 1) % 8 === 0) && i !== 0)? '\n' : '')}`
+      });
+
+      return fieldLog.join('') + ' a b c d e f g h';
     };
   
     piadap = (x, y) => {
@@ -97,7 +140,7 @@ module.exports = {
         if (condition && !(def + jump * 2 in gameField) && !(def + jump in gameField)) moves.push(def + jump * 2);
         if (!(def + jump in gameField)) moves.push(def + jump);
         const toCheck = [def + horizontalCheck[0], def + horizontalCheck[1]];
-        for (let i in toCheck) if (toCheck[i] in gameField && gameField[toCheck[i]].match(new RegExp(colorChange(figure), 'i'))) moves.push(toCheck[i]);
+        for (let i in toCheck) if (toCheck[i] in gameField && !(def % ([-9, 7].includes(toCheck[i] - def)? 8 : 7) === 0)) moves.push(toCheck[i]);
       };
   
       if (!checking) console.log(`${figure} ${def}`);
@@ -124,10 +167,12 @@ module.exports = {
         for (let i in jumps2) moves = moves.concat(extendedMoves(jumps2[i], 'rook'));
       };
       if (!checking) console.log(moves.filter(n => !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i')))).sort((m1, m2) => m2 - m1));
-      return moves.filter(n => n >= 0 && n < 65 && !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i'))));
+      return moves.filter(n => n >= 0 && n < 63 && !(n in gameField && gameField[n].match(new RegExp(figure.split(/ /)[0], 'i'))));
     };
   
     move = (gameField, img, player) => {
+      console.log(debug(gameField));
+      Bot.sendIn('661540288690651138', `**\`\`\`${debug(gameField)}\`\`\`**`);
       const otherPlayer = player.id === white.id? black : white;
       const collector = new Bot.Discord.MessageCollector(message.channel, m => m.author.id === player.id, { time: 3e5 });
       const stop = setTimeout(() => {
@@ -200,7 +245,8 @@ module.exports = {
                   });
   
                   if (!otherMoves.includes(otherKingDef)) {
-                    console.log(`If you move figure ${f} on ${move}, you won't die btw`)
+                    console.log(`If you move figure ${f} from ${index} to ${move}, you won't die btw`);
+                    console.log(fieldTest);
                     return checkmate = false;
                   }
                 });
@@ -268,7 +314,6 @@ module.exports = {
               } catch (e) {};
   
           } else if (msg.content.match(/0-0(-0)?/i)) {
-            console.log('castle')
             const jump = msg.content.length < 4? 3 : -4;
             let kingDef;
             const king = gameField.find((c, index) => {
