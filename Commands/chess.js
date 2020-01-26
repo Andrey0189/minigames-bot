@@ -101,10 +101,10 @@ module.exports = {
           figure = ' ';
       };
       
-      return ` ${((i % 8 === 0)? i / 8 + 1 : '') + figure + ((((i + 1) % 8 === 0) && i !== 0)? '\n' : '')}`
+      return ` ${((i % 8 === 0)? i / 8 + 1 + ' ' : '') + figure + ((((i + 1) % 8 === 0) && i !== 0)? '\n' : '')}`
       });
 
-      return fieldLog.join('') + ' a b c d e f g h';
+      return fieldLog.join('') + '  a b c d e f g h';
     };
   
     piadap = (x, y) => {
