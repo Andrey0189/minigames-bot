@@ -98,7 +98,7 @@ module.exports = {
           figure = '♚';
           break;
         default: 
-          figure = whiteSquares.includes(i)? ' ' : '⬛';
+          figure = whiteSquares.includes(i)? ' ' : '◼';
       };
       
       return ` ${((i % 8 === 0)? i / 8 + 1 + ' ' : '') + figure + ((((i + 1) % 8 === 0) && i !== 0)? '\n' : '')}`
