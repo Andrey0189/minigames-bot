@@ -108,7 +108,7 @@ module.exports = {
             tttText = `${message.author}, You won!\nYour score is \`${uData.raiting} (+${toAdd})\` now`;
           };
           if (calculatingWin(field, 'O')) {
-            uData.raiting -= 10; uData.save();
+            uData.raiting = Bot.negaToZero(uData.raiting - 10); uData.save();
             tttText = `${message.author}, You lose! 😎\nYour score is \`${uData.raiting} (-10)\` now`;
           };
         };
