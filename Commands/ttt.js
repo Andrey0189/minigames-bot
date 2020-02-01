@@ -119,7 +119,7 @@ module.exports = {
         if (!tttText.match(/you|draw/i)) checkingForEnd();
         await msgTtt.edit(`**${tttText}\n${tttText2}\n${arrToMsg(field)}**`);
         Bot.sendIn('661540288690651138', `**${arrToMsg(field)}**`);
-        if (tttText.match(/you|draw/i)) return Bot.autoCheck(module.exports, message, args, mentionMember);;
+        //if (tttText.match(/you|draw/i)) return Bot.autoCheck(module.exports, message, args, mentionMember);
         const timer = setTimeout(() => {
           return message.channel.send('Time is up! I won 😎');
         }, 6e4);
