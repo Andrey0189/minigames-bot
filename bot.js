@@ -38,6 +38,7 @@ class Bot {
 
         this.userData = mongoose.model('userData', _this.userSchema);
         this.shipData = mongoose.model('ship', _this.shipSchema);
+        this.autoUsing = {};
 
         this.unstable = false;
         this.name = _this.unstable? 'Minigames Bot Unstable': 'Minigames Bot';
@@ -52,6 +53,12 @@ class Bot {
         this.commands = [];
 
         RegExp.quote = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+
+        this.autoCheck = (cmd, message, args, mentionMember, user) => {
+            if (_this.autoUsing[message.author.id] === cmd.name) return cmd.run(message, args, mentionMember, user);
+        };
+
+        this.negaToZero = (num) => num < 0? 0 : num;
 
         this.emoji = (id) => _this.client.emojis.get(id) || '';
 
@@ -87,6 +94,7 @@ class Bot {
                         args: cmd.args,
                         desc: cmd.desc,
                         example: cmd.example,
+                        auto: cmd.auto,
                         private: cmd.private || false,
                         hidden: cmd.hidden || false,
                         argsCheck: cmd.argsCheck,
@@ -137,29 +145,6 @@ class Bot {
                 .setTimestamp();
                 if (!_this.unstable) _this.sendIn(_this.channels.commandsUsing, embed);
             };
-
-            if (command === 'help') {
-                if (!args[0]) {
-                    const helpCommands = _this.commands.filter(c => !c.private && !c.hidden)
-                    const arr = helpCommands.map(cmd => `◽ **${_this.prefix + cmd.name} ${cmd.args?`\`${cmd.args.join(' ')}\``:''} -** ${cmd.desc}`);
-                    const embed = new Discord.RichEmbed()
-                    .setAuthor('Help', message.author.avatarURL)
-                    .setDescription(`**Type ${_this.prefix}help \`<command-name>\` for more help about any command\n\`<...>\` - Required parameter.\n\`[...]\` - Optional parameter.\n\`|\` - OR operator.\n\`n\` - Number.**\n\n${arr.join('\n')}`)
-                    .setColor(_this.colors.main)
-                    .addField('More info', `**🆙 Vote for me: ${_this.topgg}\n:link: Official server: ${_this.server}\n:tools: Fork me on GitHub ${_this.github}\n:kiwi: Qiwi - https://qiwi.me/andreybots\n:moneybag: PayPal - __alekseyvarnavskiy84@gmail.com__\n◽ Type ${_this.prefixes[0]}donate for more info**`)
-                    .setFooter(`<> with ❤ by ${_this.creatorTag}`)
-                    message.channel.send(embed);
-                } else {
-                    const argCmd = args[0];
-                    const helpCmd = _this.commands.find(c => argCmd.match(c.regex));
-                    if (!helpCmd) return _this.err(message, 'Invalid command was provided.');
-                    const embed = new Discord.RichEmbed()
-                    .addField(`Command ${_this.prefix + helpCmd.name}`, helpCmd.desc + (helpCmd.example? '. GIF example of using:' : ''))
-                    .setImage(helpCmd.example)
-                    .setColor(_this.colors.main);
-                    message.channel.send(embed);
-                };
-            }
         };
         
         _this.client.on('message', async msg => _this.onMessage(msg));
@@ -201,53 +186,57 @@ class Bot {
         */
 
         this.colors = {
-            discord: '36393f',
-            green: '55ff55',
-            red: 'ff5555',
-            yellow: 'ffff55',
-            main: 'af00ff'
+            discord: '#36393f',
+            green: '#55ff55',
+            red: '#ff5555',
+            yellow: '#ffff55',
+            main: '#af00ff'
         };
 
-        this.chooseVariantsCmd = (message, variants, answers, minigameName, difficulty, question, score, seconds, placingAlgoritm) => {
+        this.chooseVariantsCmd = (message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm) => {
             let numberOfVariants = 6;
+            let _seconds = seconds;
+            let _score = score;
             if (difficulty.match(/eas[yi]|ле[гх]ко/i)) {
-              seconds *= 1.5;
+              _seconds *= 1.5;
               numberOfVariants = 3;
-              score *= 0.8;
+              _score *= 0.8;
             } else if (difficulty.match(/har[dt]|сло[жш]но|хар[дт]/i)) {
-              seconds *= 0.8;
+              _seconds *= 0.8;
               numberOfVariants = 12;
-              score *= 1.2;
+              _score *= 1.2;
             };
 
             async function youLose (phrase) {
               const uData = await _this.userData.findOne({id: message.author.id});
-              uData.raiting -= 5;
+              uData.raiting = _this.negaToZero(uData.raiting - _score);
               await uData.save();
               const embed = new _this.Discord.RichEmbed()
               .setAuthor(phrase, message.author.avatarURL)
               .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${uData.raiting} (-5)\` now**`)
               .setColor(_this.colors.red)
               await message.channel.send(embed);
+              if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
             } async function youWon () {
               const uData = await _this.userData.findOne({id: message.author.id});
-              uData.raiting = uData.raiting + score;
+              uData.raiting = uData.raiting + _score;
               await uData.save();
               const embed = new _this.Discord.RichEmbed()
               .setAuthor('You won!', message.author.avatarURL)
-              .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${uData.raiting} (+${score})\` now**`)
+              .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${uData.raiting} (+${_score})\` now**`)
               .setColor(_this.colors.green)
               await message.channel.send(embed);
+              if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
             };
 
             const definder = _this.random(0, variants.length - 1);
             const numberInList = _this.random(1, numberOfVariants);
             const variantsInMenu = [];
             const embed = new Discord.RichEmbed()
-            .setAuthor(`Minigame "${minigameName}"`, message.author.avatarURL,)
+            .setAuthor(`Minigame "${minigameInfo.desc}"`, message.author.avatarURL,)
             .setDescription(`${message.member}, ${question(variants[definder])}?`)
             .setColor(_this.colors.main)
-            .setFooter(`Write the correct answer down bellow (You have only ${seconds} seconds!)`)
+            .setFooter(`Write the correct answer down bellow (You have only ${_seconds} seconds!)`)
             .setTimestamp();
             for (let i = 1; i < numberOfVariants + 1; i++) {
                 let answer = placingAlgoritm(answers, definder, numberOfVariants);
@@ -259,10 +248,10 @@ class Bot {
                 embed.addField(`${i})`, `**${answer}**`, true);
             };
             message.channel.send({embed}).then(() => {
-                const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: seconds * 1e3 + 1e3 });
+                const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: _seconds * 1e3 + 1e3 });
                 const stopTimer = setTimeout(() => {
                   return youLose('Time is up! You lose >:D')
-                }, seconds * 1e3 + 1e3);
+                }, _seconds * 1e3 + 1e3);
                 collector.on('collect', msg => {
                     clearTimeout(stopTimer);
                     collector.stop();
