@@ -216,7 +216,7 @@ class Bot {
               .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${uData.raiting} (-5)\` now**`)
               .setColor(_this.colors.red)
               await message.channel.send(embed);
-              if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
+              //if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
             } async function youWon () {
               const uData = await _this.userData.findOne({id: message.author.id});
               uData.raiting = uData.raiting + _score;
@@ -226,7 +226,7 @@ class Bot {
               .setDescription(`**The correct answer is \`${numberInList})\` ${answers[definder]}\nYour score is \`${uData.raiting} (+${_score})\` now**`)
               .setColor(_this.colors.green)
               await message.channel.send(embed);
-              if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
+              //if (_this.autoUsing[message.author.id] === minigameInfo.name) _this.chooseVariantsCmd(message, variants, answers, minigameInfo, difficulty, question, score, seconds, placingAlgoritm);
             };
 
             const definder = _this.random(0, variants.length - 1);
