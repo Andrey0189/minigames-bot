@@ -4,13 +4,14 @@ module.exports = {
   args: ['[easy | medium | hard]'],
   desc: 'Guess the year of the event',
   example: 'https://media.discordapp.net/attachments/648115093850030091/668503602196643882/yearEx.gif',
+  auto: true,
   argsCheck: async () => 0,
   run: (message, args) => {
     //message, variants, answers, minigameName, difficulty, question, score, seconds, placingAlgoritm
     Bot.chooseVariantsCmd(message,
       Bot.minigames.events,
       Bot.minigames.years,
-      module.exports.desc,
+      module.exports,
       args.join(' '),
       variant => `In what year **${variant}**`,
       15, 20,
