@@ -27,17 +27,23 @@ class Bot {
         this.userSchema = new mongoose.Schema({
           id: String,
           coins: Number,
-          raiting: Number
+          raiting: Number,
+          commandsUsed: Number,
         });
 
         this.shipSchema = new mongoose.Schema({
             lover1: String,
             lover2: String,
             percents: Number,
-          });
+        });
+
+        this.botSchema = new mongoose.Schema({
+            commands: JSON
+        });
 
         this.userData = mongoose.model('userData', _this.userSchema);
         this.shipData = mongoose.model('ship', _this.shipSchema);
+        this.botData = mongoose.model('botinfo', _this.botSchema);
         this.autoUsing = {};
 
         this.unstable = false;
