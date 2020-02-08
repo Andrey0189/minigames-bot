@@ -119,7 +119,8 @@ class Bot {
             if (!await _this.userData.findOne({id: message.author.id})) await _this.userData.create({
               id: message.author.id,
               coins: 0,
-              raiting: 0
+              raiting: 0,
+              commandsUsed: 0,
             });
 
             const args = message.content.slice(msgPrefix.length).trim().split(/ +/g);
