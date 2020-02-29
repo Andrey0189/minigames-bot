@@ -243,7 +243,7 @@ class Bot {
             .setAuthor(`Minigame "${minigameInfo.desc}"`, message.author.avatarURL,)
             .setDescription(`${message.member}, ${question(variants[definder])}?`)
             .setColor(_this.colors.main)
-            .setFooter(`Write the correct answer down bellow (You have only ${_seconds} seconds!)`)
+            .setFooter(`Write the correct answer down below (You have only ${_seconds} seconds!)`)
             .setTimestamp();
             for (let i = 1; i < numberOfVariants + 1; i++) {
                 let answer = placingAlgoritm(answers, definder, numberOfVariants);
