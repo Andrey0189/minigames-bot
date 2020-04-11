@@ -134,7 +134,7 @@ class Bot {
             if (!cmd && cmdCheck) message.reply(`**Maybe you mean ${_this.prefix + command.match(cmdCheck.regex)}?**`)
             if (cmd && (!cmd.private || message.author.id === _this.creatorID)) {
                 // Ignore the next line
-                return message.reply('Sorry, Minigames Bot will be closed soon, because Discord requires account verfication, but the author of the Minigames Bot cannot verify his account for certain reasons. You can kick me from your server')
+                return message.reply('Sorry, Minigames Bot will be closed soon, because Discord requires account verfication, but the author of the Minigames Bot cannot verify his account for certain reasons. Some more info here: https://discord.gg/6XBBMDU. You can kick me from your server.')
                 for (let i = 0; cmd.args? i < cmd.args.length : false; i++) {
                     let type = cmd.args[i].slice(-1) === ']'? 'optional' : 'required';
                     if (!(i in args) && type === 'required') return _this.invalidArgs(message, cmd, 'Missing Argument')
