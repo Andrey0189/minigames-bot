@@ -172,7 +172,7 @@ class Bot {
             .setFooter(`Now we have ${_this.client.guilds.size} servers`)
             if (!_this.unstable) _this.sendIn(_this.channels.serverLeaveJoin, embed);
             const channel = guild.channels.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
-            if (channel) channel.send(`Thank you for inviting me! Type ${this.prefixes[0]}help for help!\nJoin our official server if you having some troubles or want to find some freinds: ${_this.server}\nFork me on GitHub: <${_this.github}>\nVote for me: <${_this.topgg}>`);
+            // if (channel) channel.send(`Thank you for inviting me! Type ${this.prefixes[0]}help for help!\nJoin our official server if you having some troubles or want to find some freinds: ${_this.server}\nFork me on GitHub: <${_this.github}>\nVote for me: <${_this.topgg}>`);
         });
 
         this.client.on('guildDelete', (guild) => {
